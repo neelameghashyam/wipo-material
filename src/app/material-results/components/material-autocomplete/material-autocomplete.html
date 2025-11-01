@@ -1,0 +1,80 @@
+<div class="autocomplete-container">
+  <h3>🔍 Autocomplete Examples</h3>
+  
+  <!-- Client-side: Country Selection (Multi-select) -->
+  <div class="autocomplete-section">
+    <h4>Client-Side: Country Selection (Multi-select)</h4>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Select Countries</mat-label>
+      <mat-chip-grid #chipGrid>
+        @for (country of selectedCountries; track country.code) {
+          <mat-chip-row (removed)="removeCountry(country)">
+            {{country.code}} - {{country.name}}
+            <button matChipRemove aria-label="Remove country">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip-row>
+        }
+      </mat-chip-grid>
+      <input
+        [formControl]="countryControl"
+        [matAutocomplete]="autoCountry"
+        [matChipInputFor]="chipGrid"
+        placeholder="Type to search countries...">
+      <mat-autocomplete #autoCountry="matAutocomplete"
+        (optionSelected)="selectCountry($event)">
+        @for (country of filteredCountries$ | async; track country.code) {
+          <mat-option [value]="country">
+            {{country.code}} - {{country.name}}
+          </mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+  </div>
+
+  <!-- Server-side: Species Search (Single-select) -->
+  <mat-form-field appearance="outline" class="full-width">
+  <mat-label>Search Species</mat-label>
+
+  <input matInput
+         [formControl]="speciesControl"
+         [matAutocomplete]="autoSpecies"
+         placeholder="Type at least 2 characters to search...">
+
+  <!-- Suffix – spinner OR clear button -->
+  <ng-container matSuffix>
+    <mat-spinner *ngIf="isLoadingSpecies" diameter="20"></mat-spinner>
+
+    <button *ngIf="speciesControl.value && !isLoadingSpecies"
+            mat-icon-button
+            (click)="clearSpecies()"
+            type="button"
+            aria-label="Clear species">
+      <mat-icon>close</mat-icon>
+    </button>
+  </ng-container>
+
+  <mat-autocomplete #autoSpecies="matAutocomplete"
+                    [displayWith]="displaySpecies"
+                    (optionSelected)="onSpeciesSelected($event)">
+    @for (species of filteredSpecies$ | async; track species.upovCode) {
+      <mat-option [value]="species">
+        {{species.latinName}} ({{species.upovCode}})
+      </mat-option>
+    }
+  </mat-autocomplete>
+</mat-form-field>
+
+  <!-- Selected Values Display -->
+  <div class="selected-values">
+    <h4>📋 Selected Values</h4>
+    <div class="value-item">
+      <strong>Countries:</strong> 
+      <span>{{getSelectedCountriesText()}}</span>
+    </div>
+    <div class="value-item">
+      <strong>Species:</strong> 
+      <span>{{getSelectedSpeciesText()}}</span>
+    </div>
+  </div>
+</div>

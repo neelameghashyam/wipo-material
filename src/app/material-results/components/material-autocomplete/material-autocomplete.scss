@@ -1,0 +1,135 @@
+.autocomplete-container {
+  padding: 24px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+h3 {
+  margin-top: 0;
+  margin-bottom: 24px;
+  color: #1976d2;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+h4 {
+  margin: 0 0 12px 0;
+  color: #424242;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.autocomplete-section {
+  margin-bottom: 28px;
+  
+  &:last-of-type {
+    margin-bottom: 24px;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+// Improve chip appearance
+mat-chip-row {
+  margin: 4px 4px 4px 0;
+  font-size: 14px;
+}
+
+.selected-values {
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  
+  h4 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    color: #1976d2;
+  }
+  
+  .value-item {
+    margin: 12px 0;
+    display: flex;
+    gap: 8px;
+    line-height: 1.6;
+    
+    strong {
+      color: #424242;
+      min-width: 80px;
+    }
+    
+    span {
+      color: #666;
+      flex: 1;
+    }
+  }
+}
+
+// Better mobile responsiveness
+@media (max-width: 768px) {
+  .autocomplete-container {
+    padding: 16px;
+  }
+  
+  .selected-values .value-item {
+    flex-direction: column;
+    gap: 4px;
+    
+    strong {
+      min-width: auto;
+    }
+  }
+}
+
+/* -------------------------------------------------
+   Species autocomplete – clear button (FIXED)
+   ------------------------------------------------- */
+::ng-deep mat-form-field {
+  .mat-mdc-form-field-suffix {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    height: 100% !important;
+  }
+
+  button[mat-icon-button] {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    line-height: 36px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+
+    /* Remove ALL hover/focus effects */
+    &:hover,
+    &:focus,
+    &:active {
+      background: transparent !important;
+    }
+
+    mat-icon {
+      font-size: 20px !important;
+      width: 20px !important;
+      height: 20px !important;
+      line-height: 20px !important;
+      margin: 0 !important;
+      color: rgba(0, 0, 0, 0.6) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+  }
+
+  mat-spinner {
+    margin-right: 4px !important;
+  }
+}

@@ -1,0 +1,45 @@
+<div class="card-grid">
+  @for (variety of varieties; track variety.application_number) {
+    <mat-card class="variety-card">
+      <mat-card-header>
+        <mat-card-title>
+          {{variety.latest_denomination}}
+        </mat-card-title>
+        <mat-card-subtitle>
+          {{variety.speciesLatinName}}
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-row">
+          <mat-icon>fingerprint</mat-icon>
+          <span><strong>App. Number:</strong> {{variety.application_number}}</span>
+        </div>
+        <div class="info-row">
+          <mat-icon>flag</mat-icon>
+          <span><strong>Country:</strong> {{variety.countryCode}}</span>
+        </div>
+        <div class="info-row">
+          <mat-icon>folder</mat-icon>
+          <span><strong>File ID:</strong> {{variety.fileId}}</span>
+        </div>
+        <div class="info-row">
+          <mat-icon>calendar_today</mat-icon>
+          <span><strong>Submission:</strong> {{variety.submission_date}}</span>
+        </div>
+        <div class="info-row">
+          <mat-icon>science</mat-icon>
+          <span><strong>UPOV Code:</strong> {{variety.speciesUpovCode}}</span>
+        </div>
+        <div class="info-row">
+          <mat-icon>comment</mat-icon>
+          <span><strong>Remarks:</strong> {{variety.remarks}}</span>
+        </div>
+        <mat-chip-set>
+          <mat-chip [highlighted]="variety.recType === 'Patent'">
+            {{variety.recType}}
+          </mat-chip>
+        </mat-chip-set>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>
