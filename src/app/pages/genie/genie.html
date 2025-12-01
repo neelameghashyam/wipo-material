@@ -1,0 +1,266 @@
+<div class="genie-container">
+  <!-- UPOV Header with Navigation -->
+  <header class="upov-header">
+    <div class="upov-header-main">
+      <div class="container-fluid">
+        <div class="upov-nav-wrapper">
+          <div class="upov-logo">
+            <a href="https://www.upov.int">UPOV</a>
+          </div>
+          <nav class="upov-nav">
+            <a href="#" class="nav-link">HOME</a>
+            
+            <!-- FIND & EXPLORE Dropdown -->
+            <div class="nav-dropdown">
+              <button class="nav-link dropdown-trigger" [matMenuTriggerFor]="findExploreMenu">
+                FIND & EXPLORE
+                <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+              </button>
+              <mat-menu #findExploreMenu="matMenu" class="upov-menu">
+                <div class="menu-section">
+                  <h3 class="menu-heading">Databases</h3>
+                  <button mat-menu-item>UPOV Lex</button>
+                  <button mat-menu-item>PLUTO Search</button>
+                  <button mat-menu-item>GENIE</button>
+                </div>
+                <div class="menu-section">
+                  <h3 class="menu-heading">Information & Guidance</h3>
+                  <button mat-menu-item>Explanatory Notes</button>
+                  <button mat-menu-item>Information Documents</button>
+                  <button mat-menu-item>Examination Guidance</button>
+                  <button mat-menu-item class="menu-sub-item">TGP Documents</button>
+                  <button mat-menu-item class="menu-sub-item">Test Guidelines</button>
+                  <button mat-menu-item class="menu-sub-item">TG Template</button>
+                  <button mat-menu-item class="menu-sub-item">Additional Characteristics</button>
+                </div>
+                <div class="menu-section">
+                  <h3 class="menu-heading">IT Resources</h3>
+                </div>
+                <div class="menu-section">
+                  <h3 class="menu-heading">Jurisprudence</h3>
+                </div>
+              </mat-menu>
+            </div>
+
+            <!-- PLANT VARIETY PROTECTION Dropdown -->
+            <div class="nav-dropdown">
+              <button class="nav-link dropdown-trigger" [matMenuTriggerFor]="pvpMenu">
+                PLANT VARIETY PROTECTION
+                <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+              </button>
+              <mat-menu #pvpMenu="matMenu" class="upov-menu">
+                <div class="menu-section">
+                  <h3 class="menu-heading">Learn</h3>
+                  <button mat-menu-item>FAQs</button>
+                  <button mat-menu-item>Case Studies</button>
+                  <button mat-menu-item>Farmers</button>
+                  <button mat-menu-item>Breeders</button>
+                  <button mat-menu-item>Policy-makers</button>
+                  <button mat-menu-item>PVP Training</button>
+                  <button mat-menu-item class="menu-sub-item">UPOV PVP Certificate</button>
+                  <button mat-menu-item class="menu-sub-item">Online Learning</button>
+                  <button mat-menu-item>PVP Statistics</button>
+                </div>
+              </mat-menu>
+            </div>
+
+            <!-- FILE & MANAGE Dropdown -->
+            <div class="nav-dropdown">
+              <button class="nav-link dropdown-trigger" [matMenuTriggerFor]="fileManageMenu">
+                FILE & MANAGE
+                <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+              </button>
+              <mat-menu #fileManageMenu="matMenu" class="upov-menu">
+                <div class="menu-section">
+                  <button mat-menu-item>UPOV PRISMA</button>
+                  <button mat-menu-item>UPOV e-PVP Exchange</button>
+                  <button mat-menu-item>UPOV e-PVP Administration</button>
+                  <button mat-menu-item>PLUTO Contribute</button>
+                </div>
+              </mat-menu>
+            </div>
+
+            <!-- ABOUT UPOV Dropdown -->
+            <div class="nav-dropdown">
+              <button class="nav-link dropdown-trigger" [matMenuTriggerFor]="aboutMenu">
+                ABOUT UPOV
+                <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+              </button>
+              <mat-menu #aboutMenu="matMenu" class="upov-menu">
+                <div class="menu-section">
+                  <button mat-menu-item>Overview</button>
+                  <button mat-menu-item>News</button>
+                  <button mat-menu-item>Newsletter</button>
+                  <button mat-menu-item>Press Releases</button>
+                  <button mat-menu-item>Members</button>
+                  <button mat-menu-item>Observers</button>
+                  <button mat-menu-item>Meetings & Events</button>
+                  <button mat-menu-item>Publications</button>
+                  <button mat-menu-item>Job opportunities</button>
+                </div>
+              </mat-menu>
+            </div>
+
+            <button class="search-icon-btn">
+              <mat-icon>search</mat-icon>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Breadcrumb -->
+  <div class="upov-breadcrumb">
+    <div class="container-fluid">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="#">Find & Explore</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="#">Databases</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="#">GENIE</a>
+          </li>
+          <li class="breadcrumb-item active">GENIE Database</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="upov-content">
+    <div class="container-fluid">
+      <h1 class="page-title">GENIE Database</h1>
+      
+      <p class="page-subtitle">Search by specie or authority</p>
+
+      <!-- Search Section -->
+      <div class="search-section">
+        <div class="search-wrapper">
+          <div class="search-input-container">
+            <mat-icon class="search-icon">search</mat-icon>
+            <input
+              type="text"
+              class="search-input"
+              [formControl]="searchControl"
+              placeholder="Search by UPOV code, botanical name or common name..."
+              (blur)="hideAutocomplete()"
+              autocomplete="off">
+            <button 
+              class="clear-btn" 
+              *ngIf="searchControl.value"
+              (click)="clearSearch()"
+              type="button">
+              <mat-icon>close</mat-icon>
+            </button>
+
+            <!-- Toggle Buttons Inside Input -->
+            <div class="search-toggle">
+              <mat-button-toggle-group [formControl]="searchTypeControl" class="toggle-group">
+                <mat-button-toggle value="species">Species</mat-button-toggle>
+                <mat-button-toggle value="authorities">Authorities</mat-button-toggle>
+              </mat-button-toggle-group>
+            </div>
+
+            <!-- Autocomplete Dropdown -->
+            <div class="autocomplete-dropdown" *ngIf="showAutocomplete && searchControl.value && searchControl.value.length >= 2">
+              <div class="autocomplete-loading" *ngIf="isSearching">
+                <mat-spinner diameter="24"></mat-spinner>
+                <span>Searching...</span>
+              </div>
+              <div class="autocomplete-results" *ngIf="!isSearching && searchResults.length > 0">
+                <div 
+                  class="autocomplete-item"
+                  *ngFor="let item of searchResults"
+                  (mousedown)="selectSpecies(item)">
+                  <div class="autocomplete-main">
+                    <strong>{{ item.upovCode }}</strong>
+                    <span class="item-type-badge" [class.authority]="item.type === 'authority'">
+                      {{ item.type === 'species' ? 'Species' : 'Authority' }}
+                    </span>
+                  </div>
+                  <div class="autocomplete-sub">
+                    {{ item.botanicalName }}
+                  </div>
+                  <div class="autocomplete-tertiary" *ngIf="item.commonName">
+                    {{ item.commonName }}
+                  </div>
+                </div>
+              </div>
+              <div class="autocomplete-empty" *ngIf="!isSearching && searchResults.length === 0">
+                <span>No results found for "{{ searchControl.value }}"</span>
+              </div>
+            </div>
+          </div>
+
+          <button 
+            class="search-btn"
+            (click)="onSearchSubmit()"
+            mat-raised-button>
+            Search
+          </button>
+        </div>
+
+        <p class="search-hint">You can search in English, German, Spanish and French.</p>
+      </div>
+
+      <!-- Species/Authority Details Card (if selected) -->
+      <mat-card class="details-card" *ngIf="selectedSpecies">
+        <mat-card-header>
+          <mat-card-title>
+            {{ selectedSpecies.type === 'species' ? 'Species Details' : 'Authority Details' }}
+          </mat-card-title>
+          <button 
+            mat-icon-button 
+            (click)="clearSearch()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="details-content">
+            <div class="detail-row">
+              <span class="label">GENIE ID</span>
+              <mat-chip-set>
+                <mat-chip>{{ selectedSpecies.genieId }}</mat-chip>
+              </mat-chip-set>
+            </div>
+            
+            <div class="detail-row">
+              <span class="label">UPOV Code</span>
+              <mat-chip-set>
+                <mat-chip highlighted>{{ selectedSpecies.upovCode }}</mat-chip>
+              </mat-chip-set>
+            </div>
+
+            <div class="detail-row" *ngIf="selectedSpecies.botanicalName">
+              <span class="label">{{ selectedSpecies.type === 'species' ? 'Botanical Name' : 'Full Name' }}</span>
+              <mat-chip-set>
+                <mat-chip>{{ selectedSpecies.botanicalName }}</mat-chip>
+              </mat-chip-set>
+            </div>
+
+            <div class="detail-row" *ngIf="selectedSpecies.commonName">
+              <span class="label">{{ selectedSpecies.type === 'species' ? 'Common Name' : 'Country/Region' }}</span>
+              <mat-chip-set>
+                <mat-chip>{{ selectedSpecies.commonName }}</mat-chip>
+              </mat-chip-set>
+            </div>
+
+            <div class="detail-row">
+              <span class="label">Type</span>
+              <mat-chip-set>
+                <mat-chip [highlighted]="true">
+                  {{ selectedSpecies.type === 'species' ? 'Species' : 'Authority' }}
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

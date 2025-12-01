@@ -3,13 +3,13 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'material-results',
+    redirectTo: 'genie',
     pathMatch: 'full'
   },
   {
-    path: 'material-results',
-    loadComponent: () => import('./material-results/material-results')
-      .then(m => m.MaterialResultsComponent)
+    path: 'genie',
+    loadComponent: () => import('./pages/genie/genie')
+      .then(m => m.Genie)
   }
  
 ];

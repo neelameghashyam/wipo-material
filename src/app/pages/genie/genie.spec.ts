@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MaterialAutocomplete } from './material-autocomplete';
+import { Genie } from './genie';
 
-describe('MaterialAutocomplete', () => {
-  let component: MaterialAutocomplete;
-  let fixture: ComponentFixture<MaterialAutocomplete>;
+describe('Genie', () => {
+  let component: Genie;
+  let fixture: ComponentFixture<Genie>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MaterialAutocomplete]
+      imports: [Genie]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(MaterialAutocomplete);
+    fixture = TestBed.createComponent(Genie);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
