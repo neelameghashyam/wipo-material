@@ -1,4 +1,6 @@
 @use '@angular/material' as mat;
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap');
+
 
 html {
   @include mat.theme((
@@ -30,4 +32,6 @@ body {
 /* You can add global styles to this file, and also import other style files */
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body {
+  font-family: 'Figtree', Roboto, sans-serif;
+}
