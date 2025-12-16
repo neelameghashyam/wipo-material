@@ -10,6 +10,10 @@ export const routes: Routes = [
     path: 'genie',
     loadComponent: () => import('./pages/genie/genie')
       .then(m => m.Genie)
+  },
+  {
+   path: 'header',
+    loadComponent: () => import('./shared/header/header')
+      .then(m => m.Header)
   }
- 
 ];
