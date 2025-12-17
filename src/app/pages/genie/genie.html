@@ -84,10 +84,10 @@
               *ngFor="let item of searchResults.slice(0, 8)"
               (mousedown)="selectSpecies(item)">
               <div class="autocomplete-main">
-                {{ item.upovCode }}
+                {{ searchTypeControl.value === 'species' ? item.upovCode : item.name }}
               </div>
               <div class="autocomplete-sub">
-                {{ item.botanicalName }}
+                {{ searchTypeControl.value === 'species' ? item.botanicalName : item.isoCode }}
               </div>
             </div>
           </div>
@@ -376,13 +376,14 @@
   <div
     class="species-card authority-card"
     *ngFor="let item of getPaginatedResults()"
+    (click)="selectSpecies(item)"
   >
     <!-- AUTHORITY LAYOUT -->
     <div class="authority-content">
 
       <!-- Header -->
       <div class="authority-header">
-        <h3 class="authority-title">{{ item.botanicalName }}</h3>
+        <h3 class="authority-title">{{ item.name }}</h3>
         <span class="authority-badge">All genera and species</span>
       </div>
 
@@ -392,16 +393,16 @@
         <!-- LEFT -->
         <div class="authority-col">
           <div class="authority-detail-row">
-            <mat-icon class="authority-icon">person</mat-icon>
-            <span class="authority-text">
-              {{ getAuthorityContact(item) || '-' }}
+            <mat-icon class="authority-icon">language</mat-icon>
+            <span class="authority-text website">
+              {{ getAuthorityWebsite(item) }}
             </span>
           </div>
 
           <div class="authority-detail-row">
-            <mat-icon class="authority-icon">email</mat-icon>
-            <span class="authority-text email">
-              {{ getAuthorityEmail(item) }}
+            <mat-icon class="authority-icon">gavel</mat-icon>
+            <span class="authority-text website">
+              {{ getAuthorityLawWebsite(item) }}
             </span>
           </div>
         </div>
@@ -409,16 +410,16 @@
         <!-- RIGHT -->
         <div class="authority-col">
           <div class="authority-detail-row">
-            <mat-icon class="authority-icon">phone</mat-icon>
+            <mat-icon class="authority-icon">public</mat-icon>
             <span class="authority-text">
-              {{ getAuthorityPhone(item) }}
+              {{ getAuthorityIsoCode(item) }}
             </span>
           </div>
 
           <div class="authority-detail-row">
-            <mat-icon class="authority-icon">apartment</mat-icon>
+            <mat-icon class="authority-icon">location_on</mat-icon>
             <span class="authority-text">
-              {{ getAuthorityOrganization(item) }}
+              {{ getAuthorityName(item) }}
             </span>
           </div>
         </div>
@@ -427,11 +428,18 @@
     </div>
 
     <!-- Flag -->
-    <img
-      class="authority-flag"
-      [src]="item.imageUrl"
-      [alt]="item.botanicalName"
-    />
+    <div class="authority-flag-wrapper">
+      <img
+        *ngIf="item.imageUrl"
+        class="authority-flag"
+        [src]="item.imageUrl"
+        [alt]="item.name"
+        (error)="item.imageUrl = ''"
+      />
+      <div *ngIf="!item.imageUrl" class="authority-flag-placeholder">
+        <span class="flag-na">N/A</span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -548,12 +556,12 @@
           <div class="details-content">
 
             <div class="detail-row">
-              <span class="label">GENIE ID</span>
+              <span class="label">{{ selectedSpecies.type === 'species' ? 'GENIE ID' : 'Authority ID' }}</span>
               <mat-chip>{{ selectedSpecies.genieId }}</mat-chip>
             </div>
 
             <div class="detail-row">
-              <span class="label">UPOV Code</span>
+              <span class="label">{{ selectedSpecies.type === 'species' ? 'UPOV Code' : 'ISO Code' }}</span>
               <mat-chip highlighted>
                 {{ selectedSpecies.upovCode }}
               </mat-chip>
@@ -562,6 +570,16 @@
             <div class="detail-row" *ngIf="selectedSpecies.botanicalName">
               <span class="label">Name</span>
               <mat-chip>{{ selectedSpecies.botanicalName }}</mat-chip>
+            </div>
+
+            <div class="detail-row" *ngIf="selectedSpecies.type === 'authority' && selectedSpecies.administrativeWebsite">
+              <span class="label">Website</span>
+              <mat-chip>{{ selectedSpecies.administrativeWebsite }}</mat-chip>
+            </div>
+
+            <div class="detail-row" *ngIf="selectedSpecies.type === 'authority' && selectedSpecies.lawWebsite">
+              <span class="label">Law Website</span>
+              <mat-chip>{{ selectedSpecies.lawWebsite }}</mat-chip>
             </div>
 
           </div>

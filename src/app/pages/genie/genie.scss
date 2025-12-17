@@ -1,4 +1,3 @@
-
 /* =========================================================
    UPOV – GENIE DATABASE - COMPLETE STYLES
    ========================================================= */
@@ -402,8 +401,8 @@
 
 .species-grid {
   display: grid;
-  grid-template-columns: repeat(3, 370px); /* Figma: 3 columns */
-  grid-auto-rows: 146px;                   /* 🔒 Enforce equal height */
+  grid-template-columns: repeat(3, 370px);
+  grid-auto-rows: 146px;
   gap: 24px;
   align-items: start;
 }
@@ -435,7 +434,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 8px;                 /* 🔒 EXACT */
+  gap: 8px;
   justify-content: flex-start;
   overflow: hidden;
 }
@@ -481,7 +480,7 @@
   text-underline-offset: 2px;
 
   display: -webkit-box;
-  -webkit-line-clamp: 2;      /* 🔒 EXACT */
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -511,8 +510,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-
 
 .species-image-wrapper {
   width: 116px;
@@ -567,20 +564,14 @@
   color: #6f6f6f;
 }
 
-/*============AUTHORITY GRID=================*/
+/* =========================================================
+   AUTHORITY GRID
+   ========================================================= */
 .authority-grid {
   display: grid;
   grid-template-columns: repeat(2, 557px);
   gap: 24px;
   align-items: start;
-}
-
-.authority-details-grid {
-  display: grid;
-  grid-template-columns: 265px 206px;
-  grid-template-rows: repeat(2, 17px);
-  column-gap: 24px;
-  row-gap: 8px;
 }
 
 /* ================= AUTHORITY CARD ================= */
@@ -635,14 +626,12 @@
   row-gap: 8px;
 }
 
-/* column wrapper */
 .authority-col {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-/* rows */
 .authority-detail-row {
   display: flex;
   align-items: center;
@@ -650,7 +639,6 @@
   height: 17px;
 }
 
-/* icon */
 .authority-icon {
   width: 16px;
   height: 16px;
@@ -662,7 +650,6 @@
   justify-content: center;
 }
 
-/* text */
 .authority-text {
   font-family: 'Figtree', sans-serif;
   font-size: 14px;
@@ -674,23 +661,48 @@
   text-overflow: ellipsis;
 }
 
-/* email underline */
-.authority-text.email {
-  font-weight: 600;
+.authority-text.website {
+  color: #009a6e;
   text-decoration: underline;
-  text-decoration-color: #dade14;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
+  cursor: pointer;
 }
 
 /* ================= FLAG ================= */
-.authority-flag {
+.authority-flag-wrapper {
   position: absolute;
   top: 16px;
   right: 16px;
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.authority-flag {
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
+  object-fit: cover;
+}
+
+.authority-flag-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d0d0d0;
+}
+
+.flag-na {
+  font-family: 'Figtree', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6f6f6f;
+  text-align: center;
 }
 
 /* =========================================================
@@ -842,8 +854,6 @@
 /* =========================================================
    FILTER DROPDOWN — AUTOCOMPLETE STYLE (GENIE)
    ========================================================= */
-
-/* PANEL */
 ::ng-deep .filter-select-panel,
 ::ng-deep .mat-mdc-select-panel {
   background: #ffffff !important;
@@ -854,7 +864,6 @@
   max-height: 300px !important;
 }
 
-/* OPTION (outer) */
 ::ng-deep .filter-select .mat-mdc-option {
   padding: 0 !important;
   min-height: unset !important;
@@ -862,12 +871,10 @@
   border-bottom: 1px solid #e6e6e6 !important;
 }
 
-/* REMOVE LAST BORDER */
 ::ng-deep .filter-select .mat-mdc-option:last-child {
   border-bottom: none !important;
 }
 
-/* INNER TEXT WRAPPER — THIS IS THE KEY FIX */
 ::ng-deep .filter-select .mdc-list-item__primary-text {
   padding: 12px 16px !important;
   display: flex !important;
@@ -883,27 +890,21 @@
   width: 100%;
 }
 
-/* HOVER — MATCH AUTOCOMPLETE */
 ::ng-deep .filter-select .mat-mdc-option:hover .mdc-list-item__primary-text {
   background: #e4f2e7 !important;
 }
 
-/* SELECTED / ACTIVE — SAME AS HOVER */
-::ng-deep .filter-select .mat-mdc-option.mdc-list-item--selected
-  .mdc-list-item__primary-text,
-::ng-deep .filter-select .mat-mdc-option.mat-mdc-option-active
-  .mdc-list-item__primary-text {
+::ng-deep .filter-select .mat-mdc-option.mdc-list-item--selected .mdc-list-item__primary-text,
+::ng-deep .filter-select .mat-mdc-option.mat-mdc-option-active .mdc-list-item__primary-text {
   background: #e4f2e7 !important;
 }
 
-/* REMOVE MATERIAL RIPPLE + GREY STATES */
 ::ng-deep .filter-select .mdc-list-item__ripple,
 ::ng-deep .filter-select .mdc-list-item__start,
 ::ng-deep .filter-select .mdc-list-item__end {
   display: none !important;
 }
 
-/* CHECKBOX — ALIGN LIKE AUTOCOMPLETE */
 ::ng-deep .filter-select .mat-pseudo-checkbox {
   width: 18px !important;
   height: 18px !important;
@@ -914,7 +915,6 @@
   background: transparent !important;
 }
 
-/* CHECKED STATE */
 ::ng-deep .filter-select .mat-pseudo-checkbox-checked {
   background: #dade14 !important;
   border-color: #1c4240 !important;
@@ -930,7 +930,6 @@
   left: 2px !important;
 }
 
-/* SCROLLBAR — SAME AS AUTOCOMPLETE */
 ::ng-deep .mat-mdc-select-panel::-webkit-scrollbar {
   width: 10px;
 }
@@ -944,7 +943,6 @@
   border-radius: 10px;
   border: 2px solid #e6e6e6;
 }
-
 
 /* =========================================================
    SELECTED FILTERS CHIPS (BELOW DROPDOWNS - FIGMA)

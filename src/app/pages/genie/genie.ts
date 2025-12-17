@@ -17,10 +17,10 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatRadioModule } from '@angular/material/radio';
-import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, startWith, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { Footer } from "../../shared/footer/footer";
 import { Header } from "../../shared/header/header";
-import { MOCK_SPECIES_DATA, MOCK_AUTHORITIES_DATA, SpeciesDto } from './genie-mock';
 
 interface FilterOptions {
   families: string[];
@@ -35,6 +35,26 @@ interface ActiveFilters {
   regions: string[];
   authorities: string[];
   cropTypes: string[];
+}
+
+export interface SpeciesDto {
+  genieId: string;
+  upovCode: string;
+  botanicalName?: string;
+  commonName?: string;
+  family?: string;
+  genus?: string;
+  region?: string;
+  type?: 'species' | 'authority';
+  updated?: boolean;
+  imageUrl?: string;
+  fullDetails?: any;
+  // Authority specific fields
+  authorityId?: number;
+  name?: string;
+  isoCode?: string;
+  administrativeWebsite?: string;
+  lawWebsite?: string;
 }
 
 @Component({
@@ -69,7 +89,7 @@ export class Genie implements OnInit {
   private http = inject(HttpClient);
   private snackBar = inject(MatSnackBar);
   
-  private allData: SpeciesDto[] = [...MOCK_SPECIES_DATA, ...MOCK_AUTHORITIES_DATA];
+  private readonly API_BASE_URL = 'http://localhost:8000/api/v1';
   
   searchControl = new FormControl('');
   searchTypeControl = new FormControl('species');
@@ -113,23 +133,7 @@ export class Genie implements OnInit {
   ngOnInit() {
     this.setupSearchListener();
     this.loadLatestSpecies();
-    this.initializeFilterOptions();
     this.setupFilterSearch();
-  }
-
-  initializeFilterOptions() {
-    const species = this.allData.filter(item => item.type === 'species');
-    const authorities = this.allData.filter(item => item.type === 'authority');
-
-    this.filterOptions.families = [...new Set(species.map(s => s.family).filter(Boolean))].sort() as string[];
-    this.filterOptions.genera = [...new Set(species.map(s => s.genus).filter(Boolean))].sort() as string[];
-    this.filterOptions.regions = [...new Set([...species, ...authorities].map(s => s.region).filter(Boolean))].sort() as string[];
-    this.filterOptions.authorities = [...new Set(authorities.map(a => a.botanicalName).filter(Boolean))].sort() as string[];
-
-    this.filteredFamilies = this.filterOptions.families;
-    this.filteredGenera = this.filterOptions.genera;
-    this.filteredRegions = this.filterOptions.regions;
-    this.filteredAuthorities = this.filterOptions.authorities;
   }
 
   setupFilterSearch() {
@@ -153,9 +157,28 @@ export class Genie implements OnInit {
   }
 
   loadLatestSpecies() {
-    this.latestSpecies = this.allData
-      .filter(item => item.type === 'species' && item.updated)
-      .slice(0, 6);
+    this.http.get<any>(`${this.API_BASE_URL}/species?page=0&pageSize=6`)
+      .pipe(
+        catchError(error => {
+          console.error('Error loading latest species:', error);
+          this.snackBar.open('Error loading latest species', 'Close', { duration: 3000 });
+          return of({ species: [] });
+        })
+      )
+      .subscribe(response => {
+        this.latestSpecies = (response.species || []).map((item: any) => ({
+          genieId: item.genieId.toString(),
+          upovCode: item.upovCode,
+          botanicalName: item.botanicalName || item.defaultName,
+          commonName: '',
+          family: '',
+          genus: '',
+          region: '',
+          type: 'species',
+          updated: true,
+          imageUrl: ''
+        }));
+      });
   }
 
   setupSearchListener() {
@@ -174,16 +197,12 @@ export class Genie implements OnInit {
           this.isSearching = true;
           this.showAutocomplete = true;
           
-          const results = this.performSearch(query);
+          this.performSearch(query);
           
-          setTimeout(() => this.isSearching = false, 200);
-          return results;
+          return [];
         })
       )
-      .subscribe(results => {
-        this.searchResults = results;
-        this.totalResults = results.length;
-      });
+      .subscribe();
 
     this.searchTypeControl.valueChanges.subscribe(() => {
       const currentValue = this.searchControl.value;
@@ -194,24 +213,94 @@ export class Genie implements OnInit {
     });
   }
 
-  performSearch(query: string): SpeciesDto[] {
+  performSearch(query: string): void {
     const searchType = this.searchTypeControl.value;
-    const searchQuery = query.trim().toLowerCase();
+    const searchQuery = query.trim();
     
-    let filtered = this.allData.filter(item => {
-      if (searchType === 'species' && item.type !== 'species') return false;
-      if (searchType === 'authorities' && item.type !== 'authority') return false;
-      
-      return (
-        item.upovCode.toLowerCase().includes(searchQuery) ||
-        item.botanicalName?.toLowerCase().includes(searchQuery) ||
-        item.commonName?.toLowerCase().includes(searchQuery) ||
-        item.genieId.toLowerCase().includes(searchQuery)
-      );
-    });
+    if (searchType === 'species') {
+      this.http.get<any[]>(`${this.API_BASE_URL}/species/search?q=${encodeURIComponent(searchQuery)}`)
+        .pipe(
+          catchError(error => {
+            console.error('Error searching species:', error);
+            this.snackBar.open('Error searching species', 'Close', { duration: 3000 });
+            this.isSearching = false;
+            return of([]);
+          })
+        )
+        .subscribe(response => {
+          let results: SpeciesDto[] = (response || []).map((item: any) => ({
+            genieId: item.genieId.toString(),
+            upovCode: item.upovCode,
+            botanicalName: item.botanicalName || item.defaultName,
+            commonName: '',
+            family: '',
+            genus: '',
+            region: '',
+            type: 'species',
+            updated: false,
+            imageUrl: ''
+          }));
+          
+          results = this.applyFilters(results);
+          
+          this.searchResults = results;
+          this.totalResults = results.length;
+          this.isSearching = false;
+          
+          this.filterOptions.families = [];
+          this.filterOptions.genera = [];
+          this.filteredFamilies = [];
+          this.filteredGenera = [];
+        });
+    } else {
+      // API call for authorities search
+      this.http.get<any[]>(`${this.API_BASE_URL}/authority/search?q=${encodeURIComponent(searchQuery)}`)
+        .pipe(
+          catchError(error => {
+            console.error('Error searching authorities:', error);
+            this.snackBar.open('Error searching authorities', 'Close', { duration: 3000 });
+            this.isSearching = false;
+            return of([]);
+          })
+        )
+        .subscribe(response => {
+          let results: SpeciesDto[] = (response || []).map((item: any) => ({
+            genieId: item.authorityId.toString(),
+            upovCode: item.isoCode || '-',
+            botanicalName: item.name,
+            commonName: '',
+            family: '',
+            genus: '',
+            region: '',
+            type: 'authority',
+            updated: false,
+            imageUrl: this.getFlagUrl(item.isoCode),
+            // Store authority specific data
+            authorityId: item.authorityId,
+            name: item.name,
+            isoCode: item.isoCode,
+            administrativeWebsite: item.administrativeWebsite,
+            lawWebsite: item.lawWebsite
+          }));
 
-    filtered = this.applyFilters(filtered);
-    return filtered;
+          results = this.applyFilters(results);
+          
+          this.searchResults = results;
+          this.totalResults = results.length;
+          this.isSearching = false;
+
+          // Update filter options for authorities
+          this.filterOptions.authorities = [...new Set(results.map(a => a.name).filter(Boolean))].sort() as string[];
+          this.filteredAuthorities = this.filterOptions.authorities;
+        });
+    }
+  }
+
+  getFlagUrl(isoCode: string | undefined): string {
+    if (!isoCode || isoCode === '-' || isoCode.length !== 2) {
+      return '';
+    }
+    return `https://flagcdn.com/w80/${isoCode.toLowerCase()}.png`;
   }
 
   applyFilters(data: SpeciesDto[]): SpeciesDto[] {
@@ -237,7 +326,7 @@ export class Genie implements OnInit {
 
     if (this.activeFilters.authorities.length > 0) {
       filtered = filtered.filter(item => 
-        this.activeFilters.authorities.includes(item.botanicalName || '')
+        this.activeFilters.authorities.includes(item.name || '')
       );
     }
 
@@ -258,8 +347,7 @@ export class Genie implements OnInit {
   applyFiltersToResults() {
     const query = this.searchControl.value;
     if (query && query.length >= 2) {
-      this.searchResults = this.performSearch(query);
-      this.totalResults = this.searchResults.length;
+      this.performSearch(query);
       this.currentPage = 1;
     }
   }
@@ -293,9 +381,69 @@ export class Genie implements OnInit {
   }
 
   selectSpecies(species: SpeciesDto) {
-    this.selectedSpecies = species;
-    this.searchControl.setValue(species.upovCode);
-    this.showAutocomplete = false;
+    if (species.type === 'species') {
+      this.http.get<any>(`${this.API_BASE_URL}/species/${species.genieId}`)
+        .pipe(
+          catchError(error => {
+            console.error('Error loading species details:', error);
+            this.snackBar.open('Error loading species details', 'Close', { duration: 3000 });
+            return of(null);
+          })
+        )
+        .subscribe(response => {
+          if (response) {
+            this.selectedSpecies = {
+              genieId: response.genieId.toString(),
+              upovCode: response.upovCode,
+              botanicalName: response.botanicalName,
+              commonName: response.names?.commonNames?.en || '',
+              family: response.family || '',
+              genus: '',
+              region: '',
+              type: 'species',
+              updated: false,
+              imageUrl: '',
+              fullDetails: response
+            };
+            this.searchControl.setValue(response.upovCode);
+            this.showAutocomplete = false;
+          }
+        });
+    } else {
+      // For authorities, fetch full details from API
+      this.http.get<any>(`${this.API_BASE_URL}/authority/${species.authorityId}`)
+        .pipe(
+          catchError(error => {
+            console.error('Error loading authority details:', error);
+            this.snackBar.open('Error loading authority details', 'Close', { duration: 3000 });
+            return of(null);
+          })
+        )
+        .subscribe(response => {
+          if (response) {
+            this.selectedSpecies = {
+              genieId: response.authorityId.toString(),
+              upovCode: response.isoCode || '-',
+              botanicalName: response.name,
+              commonName: '',
+              family: '',
+              genus: '',
+              region: '',
+              type: 'authority',
+              updated: false,
+              imageUrl: this.getFlagUrl(response.isoCode),
+              authorityId: response.authorityId,
+              name: response.name,
+              isoCode: response.isoCode,
+              administrativeWebsite: response.administrativeWebsite,
+              lawWebsite: response.lawWebsite,
+              fullDetails: response
+            };
+            this.searchControl.setValue(response.name);
+            this.showAutocomplete = false;
+          }
+        });
+    }
   }
 
   onSearchSubmit() {
@@ -325,71 +473,35 @@ export class Genie implements OnInit {
     this.showFilters = !this.showFilters;
   }
 
-  /**
-   * 🔹 NEW: Check if we should show the results header
-   * Returns TRUE only if:
-   * - showResults is TRUE
-   * - totalResults > 0 OR (totalResults === 0 AND filters are applied AND search type is species)
-   */
   shouldShowResultsHeader(): boolean {
     if (!this.showResults) return false;
     
     const hasFiltersApplied = this.getActiveFilterCount() > 0;
     const isSpeciesSearch = this.searchTypeControl.value === 'species';
     
-    // Show header if we have results
     if (this.totalResults > 0) return true;
     
-    // Show header if filters applied and species search (even with 0 results)
     if (hasFiltersApplied && isSpeciesSearch) return false;
     
-    // Hide header for simple zero-result searches
     return false;
   }
 
-  /**
-   * 🔹 NEW: Check if we should show the filters button
-   * Returns TRUE only if:
-   * - showResults is TRUE
-   * - totalResults > 0 OR (totalResults === 0 AND filters are applied AND search type is species)
-   */
-   shouldShowFiltersButton(): boolean {
+  shouldShowFiltersButton(): boolean {
     if (!this.showResults) return false;
-    
-    const isSpeciesSearch = this.searchTypeControl.value === 'species';
-    
-    // NEVER show filters button for authorities search
-    if (!isSpeciesSearch) return false;
     
     const hasFiltersApplied = this.getActiveFilterCount() > 0;
     
-    // Show filters button if we have results (species only)
     if (this.totalResults > 0) return true;
     
-    // Show filters button if filters applied (even with 0 results, species only)
     if (hasFiltersApplied) return true;
     
-    // Hide filters button for simple zero-result searches
     return false;
   }
 
-  /**
-   * 🔹 NEW: Check if we should show the empty state
-   * Returns TRUE only if:
-   * - showResults is TRUE
-   * - totalResults === 0
-   */
   shouldShowEmptyState(): boolean {
     return this.showResults && this.totalResults === 0;
   }
 
-  /**
-   * 🔹 NEW: Check if we should show pagination
-   * Returns TRUE only if:
-   * - showResults is TRUE
-   * - totalResults > 0
-   * - getTotalPages() > 1
-   */
   shouldShowPagination(): boolean {
     return this.showResults && this.totalResults > 0 && this.getTotalPages() > 1;
   }
@@ -486,23 +598,19 @@ export class Genie implements OnInit {
     this.onSearchSubmit();
   }
 
-  getAuthorityContact(item: SpeciesDto): string {
-    const authorityItem = item as any;
-    return authorityItem.contactPerson || '-';
+  getAuthorityWebsite(item: SpeciesDto): string {
+    return item.administrativeWebsite || '-';
   }
 
-  getAuthorityEmail(item: SpeciesDto): string {
-    const authorityItem = item as any;
-    return authorityItem.email || '-';
+  getAuthorityLawWebsite(item: SpeciesDto): string {
+    return item.lawWebsite || '-';
   }
 
-  getAuthorityPhone(item: SpeciesDto): string {
-    const authorityItem = item as any;
-    return authorityItem.phone || '-';
+  getAuthorityName(item: SpeciesDto): string {
+    return item.name || '-';
   }
 
-  getAuthorityOrganization(item: SpeciesDto): string {
-    const authorityItem = item as any;
-    return authorityItem.organization || '-';
+  getAuthorityIsoCode(item: SpeciesDto): string {
+    return item.isoCode || '-';
   }
 }
