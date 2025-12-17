@@ -636,7 +636,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 17px;
+  min-height: 17px;
+  max-width: 100%;
 }
 
 .authority-icon {
@@ -656,9 +657,19 @@
   font-weight: 400;
   line-height: 17px;
   color: #303030;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.authority-text:not(.expanded) {
+  white-space: nowrap;
+}
+
+.authority-text.expanded {
+  white-space: normal;
+  word-break: break-all;
 }
 
 .authority-text.website {
@@ -667,6 +678,23 @@
   cursor: pointer;
 }
 
+.authority-text.website:hover {
+  color: #007a56;
+}
+
+.expand-link {
+  color: #009a6e;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  white-space: nowrap;
+  margin-left: 4px;
+}
+
+.expand-link:hover {
+  color: #007a56;
+}
 /* ================= FLAG ================= */
 .authority-flag-wrapper {
   position: absolute;
