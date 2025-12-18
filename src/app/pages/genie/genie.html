@@ -109,8 +109,9 @@
         </div>
       </section>
 
-      <!-- ================= PADDED CONTENT ================= -->
-      <div class="container-fluid">
+      
+      <!-- ================= PADDED CONTENT - ONLY SHOW WHEN NOT IN RESULTS ================= -->
+      <div class="container-fluid" *ngIf="!showResults">
 
         <!-- ================= LATEST UPDATED SPECIES ================= -->
         <section class="latest-section">
