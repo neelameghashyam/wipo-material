@@ -1,14 +1,24 @@
 import { Component, Input, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    MatToolbarModule,
+    MatButtonModule,
+    MatMenuModule,
+    MatIconModule
+  ],
   templateUrl: './header.html',
   styleUrls: ['./header.scss']
 })
-export class Header {
+export class Header{
   @Input() lang: string = 'en';
   @Input() breadcrumbLevel: string | null = null;
   @Input() breadcrumbText: string | null = null;
@@ -69,5 +79,13 @@ export class Header {
     if (!target.closest('.nav-item')) {
       this.activeDropdown = null;
     }
+  }
+
+  onMenuOpened(dropdownName: string): void {
+    this.activeDropdown = dropdownName;
+  }
+
+  onMenuClosed(): void {
+    this.activeDropdown = null;
   }
 }

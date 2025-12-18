@@ -1,4 +1,4 @@
-/* footer.component.scss - Matching Figma Design Exactly */
+/* footer.component.scss - Angular Material Integration with Exact Dimensions */
 
 #upov-footer {
   background-color: #203938;
@@ -49,65 +49,111 @@
   color: #FFFFFF;
 }
 
-/* Social Media Icons */
+/* Social Media Icons with Material Button Override */
 .footer-social {
   display: flex;
   gap: 10px;
   margin-bottom: 16px;
   
-  a {
-    width: 37px;
-    height: 37px;
-    border-radius: 50%;
-    border: 1px solid #FFFFFF;
-    background-color: #1C4240;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .social-icon-button {
+    // Override Material button defaults to match original design
+    width: 37px !important;
+    height: 37px !important;
+    min-width: 37px !important;
+    min-height: 37px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    border: 1px solid #FFFFFF !important;
+    background-color: #1C4240 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     text-decoration: none;
-    color: #FFFFFF;
-    transition: all 0.2s ease;
+    color: #FFFFFF !important;
+    line-height: 1 !important;
+    
+    // Remove Material button ripple container padding
+    ::ng-deep .mat-mdc-button-touch-target {
+      display: none;
+    }
+    
+    // Center the icon
+    ::ng-deep .mat-mdc-button-persistent-ripple {
+      border-radius: 50%;
+    }
     
     &:hover {
-      background-color: rgba(255, 255, 255, 0.1);
+      background-color: rgba(255, 255, 255, 0.1) !important;
       transform: translateY(-2px);
     }
     
-    svg {
-      width: 16px;
-      height: 16px;
-      fill: currentColor;
+    mat-icon {
+      width: 16px !important;
+      height: 16px !important;
+      font-size: 16px !important;
+      line-height: 16px !important;
+      color: #FFFFFF !important;
+      
+      ::ng-deep svg {
+        width: 16px !important;
+        height: 16px !important;
+        fill: currentColor;
+      }
     }
   }
 }
 
-/* Divider Line */
-.footer-divider {
+/* Divider Line - Override Material Divider */
+::ng-deep .footer-divider {
   width: 100%;
-  height: 1px;
-  background-color: #FFFFFF;
-  margin-bottom: 16px;
+  border-top-width: 1px !important;
+  border-top-style: solid !important;
+  border-top-color: #FFFFFF !important;
+  margin: 0 0 16px 0 !important;
+  
+  &.mat-divider {
+    border-top-color: #FFFFFF !important;
+  }
 }
 
-/* Footer Links */
+/* Footer Links with Material Button Override */
 .footer-links {
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
   
-  a {
-    font-family: 'Figtree', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 19.2px;
-    color: #FFFFFF;
+  .footer-link {
+    // Override Material button defaults
+    font-family: 'Figtree', sans-serif !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    line-height: 19.2px !important;
+    color: #FFFFFF !important;
     text-decoration: none;
     white-space: nowrap;
-    transition: opacity 0.2s ease;
+    padding: 0 !important;
+    min-width: auto !important;
+    height: auto !important;
+    background: transparent !important;
+    
+    // Remove Material button default styles
+    ::ng-deep .mat-mdc-button-persistent-ripple,
+    ::ng-deep .mat-mdc-button-touch-target {
+      display: none;
+    }
+    
+    // Material button label
+    ::ng-deep .mdc-button__label {
+      font-family: 'Figtree', sans-serif !important;
+      font-size: 16px !important;
+      font-weight: 600 !important;
+      line-height: 19.2px !important;
+    }
     
     &:hover {
       opacity: 0.8;
       text-decoration: underline;
+      background: transparent !important;
     }
   }
 }
@@ -173,13 +219,21 @@
   .footer-social {
     gap: 8px;
     
-    a {
-      width: 32px;
-      height: 32px;
+    .social-icon-button {
+      width: 32px !important;
+      height: 32px !important;
+      min-width: 32px !important;
+      min-height: 32px !important;
       
-      svg {
-        width: 14px;
-        height: 14px;
+      mat-icon {
+        width: 14px !important;
+        height: 14px !important;
+        font-size: 14px !important;
+        
+        ::ng-deep svg {
+          width: 14px !important;
+          height: 14px !important;
+        }
       }
     }
   }
@@ -188,8 +242,12 @@
     flex-direction: column;
     gap: 12px;
     
-    a {
-      font-size: 14px;
+    .footer-link {
+      font-size: 14px !important;
+      
+      ::ng-deep .mdc-button__label {
+        font-size: 14px !important;
+      }
     }
   }
 }

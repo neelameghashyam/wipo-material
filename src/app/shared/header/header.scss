@@ -1,12 +1,32 @@
-/* Header Styles - EXACT Figma Dimensions */
-/* Total header section: 1440px × 109px */
-/* Header: 1440px × 69px */
-/* Breadcrumb: 1440px × 40px */
-
-/* Remove any default body margins */
 body {
   margin: 0;
   padding: 0;
+}
+
+/* Override Material Design defaults */
+::ng-deep {
+  .mat-toolbar {
+    padding: 0 !important;
+  }
+
+  .mat-mdc-button {
+    min-width: auto !important;
+    padding: 0 !important;
+  }
+
+  .mat-mdc-icon-button {
+    padding: 0 !important;
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .mat-icon {
+    width: auto !important;
+    height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
 }
 
 /* Wrapper for entire header section */
@@ -20,13 +40,15 @@ body {
 }
 
 .header {
-  background-color: #1C4240;
-  color: #ffffff;
-  font-family: 'Figtree', 'Roboto', "Helvetica Neue", sans-serif;
+  background-color: #1C4240 !important;
+  color: #ffffff !important;
+  font-family: 'Figtree', 'Roboto', "Helvetica Neue", sans-serif !important;
   width: 100%;
-  height: 69px; /* EXACT Figma height */
+  height: 69px !important; /* EXACT Figma height */
   margin: 0;
-  padding: 0;
+  padding: 0 !important;
+  min-height: 69px !important;
+  max-height: 69px !important;
 }
 
 .header-container {
@@ -92,27 +114,33 @@ body {
 }
 
 .nav-link {
-  color: #ffffff;
+  color: #ffffff !important;
   text-decoration: none;
-  font-size: 13px; /* EXACT from Figma */
-  font-weight: 500; /* EXACT from Figma */
-  letter-spacing: 0.5px;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
+  font-size: 13px !important; /* EXACT from Figma */
+  font-weight: 800 !important; /* EXACT from Figma */
+  letter-spacing: 0.5px !important;
+  padding: 0 16px !important;
+  display: flex !important;
+  align-items: center !important;
   gap: 6px;
-  background: none;
-  border: none;
+  background: none !important;
+  border: none !important;
   cursor: pointer;
   transition: background-color 0.3s ease;
   white-space: nowrap;
-  font-family: 'Figtree', 'Roboto', sans-serif;
-  height: 69px; /* Full header height */
+  font-family: 'Figtree', sans-serif !important;
+  height: 69px !important; /* Full header height */
   box-sizing: border-box;
-  text-transform: uppercase;
+  text-transform: uppercase !important;
+  border-radius: 0 !important;
+  line-height: normal !important;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  &.mat-mdc-button {
+    min-width: auto !important;
   }
 }
 
@@ -133,26 +161,24 @@ body {
   }
 }
 
-.dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background-color: #DADE14;
-  min-width: 280px;
-  padding: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-10px);
-  transition: all 0.3s ease;
-  border-radius: 0;
-  z-index: 1000;
-  margin: 0;
+/* Material Menu Overrides */
+::ng-deep {
+  .upov-dropdown.mat-mdc-menu-panel {
+    background-color: #DADE14 !important;
+    min-width: 280px !important;
+    max-width: none !important;
+    border-radius: 0 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    margin-top: 0 !important;
+  }
 
-  &.active {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
+  .upov-dropdown .mat-mdc-menu-content {
+    padding: 0 !important;
+  }
+
+  .dropdown-content {
+    padding: 0;
+    width: 100%;
   }
 }
 
@@ -191,57 +217,46 @@ body {
   }
 }
 
-// For FILE & MANAGE dropdown (no sections, just links)
-.nav-item:nth-child(4) .dropdown-menu {
-  .dropdown-link {
-    padding: 16px 24px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+// Simple menu style (FILE & MANAGE, ABOUT UPOV)
+::ng-deep {
+  .simple-menu.mat-mdc-menu-panel {
+    .dropdown-link {
+      padding: 16px 24px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      margin: 0;
 
-    &:last-child {
-      border-bottom: none;
-    }
+      &:last-child {
+        border-bottom: none;
+      }
 
-    &:hover {
-      padding-left: 32px;
-    }
-  }
-}
-
-// For ABOUT UPOV dropdown (no sections, just links)
-.nav-item:nth-child(5) .dropdown-menu {
-  .dropdown-link {
-    padding: 16px 24px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    &:hover {
-      padding-left: 32px;
+      &:hover {
+        padding-left: 32px;
+      }
     }
   }
 }
 
 .search-btn {
-  background: none;
-  border: none;
-  color: #ffffff;
+  background: none !important;
+  border: none !important;
+  color: #ffffff !important;
   cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 0 !important;
   transition: background-color 0.3s ease;
   flex-shrink: 0;
-  width: 24px; /* EXACT from Figma - Image 1 */
-  height: 24px; /* EXACT from Figma - Image 1 */
+  width: 24px !important; /* EXACT from Figma - Image 1 */
+  height: 24px !important; /* EXACT from Figma - Image 1 */
   margin-left: 8px;
   position: relative;
+  min-width: 24px !important;
+  min-height: 24px !important;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.1) !important;
   }
 
   svg {
@@ -250,6 +265,11 @@ body {
     position: absolute;
     top: 3px; /* EXACT from Figma - Image 2 */
     left: 3px; /* EXACT from Figma - Image 2 */
+  }
+
+  .mat-icon {
+    width: 18px !important;
+    height: 18px !important;
   }
 }
 
@@ -304,7 +324,7 @@ body {
     .breadcrumb-link {
       color: #1C4240;
       text-decoration: none;
-            font-weight: 800;
+      font-weight: 800;
 
       &:hover {
         text-decoration: underline;

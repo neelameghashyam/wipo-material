@@ -1,7 +1,7 @@
 <!-- Header start -->
 <header id="upov-header">
   <div class="upov-header-main">
-    <div class="header">
+    <mat-toolbar class="header">
       <div class="header-container">
         <div class="header-logo">
           <a href="https://www.upov.int/">
@@ -11,115 +11,154 @@
         
         <nav class="header-nav">
           <ul class="nav-menu">
+            <!-- HOME -->
             <li class="nav-item">
               <a href="#" class="nav-link">HOME</a>
             </li>
             
+            <!-- FIND & EXPLORE -->
             <li class="nav-item has-dropdown">
-              <button class="nav-link dropdown-toggle" (click)="toggleDropdown('findExplore')">
+              <button 
+                mat-button 
+                class="nav-link dropdown-toggle"
+                [matMenuTriggerFor]="findExploreMenu"
+                (menuOpened)="onMenuOpened('findExplore')"
+                (menuClosed)="onMenuClosed()"
+                [class.active]="activeDropdown === 'findExplore'">
                 FIND & EXPLORE
                 <svg class="dropdown-icon" width="8" height="5" viewBox="0 0 8 5" fill="#DADE14" xmlns="http://www.w3.org/2000/svg">
                   <polygon points="0,0 8,0 4,5"/>
                 </svg>
               </button>
-              <div class="dropdown-menu" [class.active]="activeDropdown === 'findExplore'">
-                <div class="dropdown-section">
-                  <h3 class="dropdown-heading">Databases</h3>
-                  <a href="#" class="dropdown-link">UPOV Lex</a>
-                  <a href="#" class="dropdown-link">PLUTO Search</a>
-                  <a href="#" class="dropdown-link">GENIE</a>
+              <mat-menu #findExploreMenu="matMenu" class="dropdown-menu upov-dropdown">
+                <div class="dropdown-content" (click)="$event.stopPropagation()">
+                  <div class="dropdown-section">
+                    <h3 class="dropdown-heading">Databases</h3>
+                    <a href="#" class="dropdown-link">UPOV Lex</a>
+                    <a href="#" class="dropdown-link">PLUTO Search</a>
+                    <a href="#" class="dropdown-link">GENIE</a>
+                  </div>
+                  <div class="dropdown-section">
+                    <h3 class="dropdown-heading">Information & Guidance</h3>
+                    <a href="#" class="dropdown-link">Explanatory Notes</a>
+                    <a href="#" class="dropdown-link">Information Documents</a>
+                    <a href="#" class="dropdown-link">Examination Guidance</a>
+                    <a href="#" class="dropdown-link">TGP Documents</a>
+                    <a href="#" class="dropdown-link">Test Guidelines</a>
+                    <a href="#" class="dropdown-link">TG Template</a>
+                    <a href="#" class="dropdown-link">Additional Characteristics</a>
+                  </div>
+                  <div class="dropdown-section">
+                    <h3 class="dropdown-heading">IT Resources</h3>
+                  </div>
+                  <div class="dropdown-section">
+                    <h3 class="dropdown-heading">Jurisprudence</h3>
+                  </div>
                 </div>
-                <div class="dropdown-section">
-                  <h3 class="dropdown-heading">Information & Guidance</h3>
-                  <a href="#" class="dropdown-link">Explanatory Notes</a>
-                  <a href="#" class="dropdown-link">Information Documents</a>
-                  <a href="#" class="dropdown-link">Examination Guidance</a>
-                  <a href="#" class="dropdown-link">TGP Documents</a>
-                  <a href="#" class="dropdown-link">Test Guidelines</a>
-                  <a href="#" class="dropdown-link">TG Template</a>
-                  <a href="#" class="dropdown-link">Additional Characteristics</a>
-                </div>
-                <div class="dropdown-section">
-                  <h3 class="dropdown-heading">IT Resources</h3>
-                </div>
-                <div class="dropdown-section">
-                  <h3 class="dropdown-heading">Jurisprudence</h3>
-                </div>
-              </div>
+              </mat-menu>
             </li>
             
+            <!-- PLANT VARIETY PROTECTION -->
             <li class="nav-item has-dropdown">
-              <button class="nav-link dropdown-toggle" (click)="toggleDropdown('plantVariety')">
+              <button 
+                mat-button 
+                class="nav-link dropdown-toggle"
+                [matMenuTriggerFor]="plantVarietyMenu"
+                (menuOpened)="onMenuOpened('plantVariety')"
+                (menuClosed)="onMenuClosed()"
+                [class.active]="activeDropdown === 'plantVariety'">
                 PLANT VARIETY PROTECTION
                 <svg class="dropdown-icon" width="8" height="5" viewBox="0 0 8 5" fill="#DADE14" xmlns="http://www.w3.org/2000/svg">
                   <polygon points="0,0 8,0 4,5"/>
                 </svg>
               </button>
-              <div class="dropdown-menu" [class.active]="activeDropdown === 'plantVariety'">
-                <div class="dropdown-section">
-                  <h3 class="dropdown-heading">Learn</h3>
-                  <a href="#" class="dropdown-link">FAQs</a>
-                  <a href="#" class="dropdown-link">Case Studies</a>
-                  <a href="#" class="dropdown-link">Farmers</a>
-                  <a href="#" class="dropdown-link">Breeders</a>
-                  <a href="#" class="dropdown-link">Policy-makers</a>
+              <mat-menu #plantVarietyMenu="matMenu" class="dropdown-menu upov-dropdown">
+                <div class="dropdown-content" (click)="$event.stopPropagation()">
+                  <div class="dropdown-section">
+                    <h3 class="dropdown-heading">Learn</h3>
+                    <a href="#" class="dropdown-link">FAQs</a>
+                    <a href="#" class="dropdown-link">Case Studies</a>
+                    <a href="#" class="dropdown-link">Farmers</a>
+                    <a href="#" class="dropdown-link">Breeders</a>
+                    <a href="#" class="dropdown-link">Policy-makers</a>
+                  </div>
+                  <div class="dropdown-section">
+                    <h3 class="dropdown-heading">PVP Training</h3>
+                    <a href="#" class="dropdown-link">UPOV PVP Certificate</a>
+                    <a href="#" class="dropdown-link">Online Learning</a>
+                  </div>
+                  <div class="dropdown-section">
+                    <h3 class="dropdown-heading">PVP Statistics</h3>
+                  </div>
                 </div>
-                <div class="dropdown-section">
-                  <h3 class="dropdown-heading">PVP Training</h3>
-                  <a href="#" class="dropdown-link">UPOV PVP Certificate</a>
-                  <a href="#" class="dropdown-link">Online Learning</a>
-                </div>
-                <div class="dropdown-section">
-                  <h3 class="dropdown-heading">PVP Statistics</h3>
-                </div>
-              </div>
+              </mat-menu>
             </li>
             
+            <!-- FILE & MANAGE -->
             <li class="nav-item has-dropdown">
-              <button class="nav-link dropdown-toggle" (click)="toggleDropdown('fileManage')">
+              <button 
+                mat-button 
+                class="nav-link dropdown-toggle"
+                [matMenuTriggerFor]="fileManageMenu"
+                (menuOpened)="onMenuOpened('fileManage')"
+                (menuClosed)="onMenuClosed()"
+                [class.active]="activeDropdown === 'fileManage'">
                 FILE & MANAGE
                 <svg class="dropdown-icon" width="8" height="5" viewBox="0 0 8 5" fill="#DADE14" xmlns="http://www.w3.org/2000/svg">
                   <polygon points="0,0 8,0 4,5"/>
                 </svg>
               </button>
-              <div class="dropdown-menu" [class.active]="activeDropdown === 'fileManage'">
-                <a href="#" class="dropdown-link">UPOV PRISMA</a>
-                <a href="#" class="dropdown-link">UPOV e-PVP Exchange</a>
-                <a href="#" class="dropdown-link">UPOV e-PVP Administration</a>
-                <a href="#" class="dropdown-link">PLUTO Contribute</a>
-              </div>
+              <mat-menu #fileManageMenu="matMenu" class="dropdown-menu upov-dropdown simple-menu">
+                <div class="dropdown-content" (click)="$event.stopPropagation()">
+                  <a href="#" class="dropdown-link">UPOV PRISMA</a>
+                  <a href="#" class="dropdown-link">UPOV e-PVP Exchange</a>
+                  <a href="#" class="dropdown-link">UPOV e-PVP Administration</a>
+                  <a href="#" class="dropdown-link">PLUTO Contribute</a>
+                </div>
+              </mat-menu>
             </li>
             
+            <!-- ABOUT UPOV -->
             <li class="nav-item has-dropdown">
-              <button class="nav-link dropdown-toggle" (click)="toggleDropdown('aboutUpov')">
+              <button 
+                mat-button 
+                class="nav-link dropdown-toggle"
+                [matMenuTriggerFor]="aboutUpovMenu"
+                (menuOpened)="onMenuOpened('aboutUpov')"
+                (menuClosed)="onMenuClosed()"
+                [class.active]="activeDropdown === 'aboutUpov'">
                 ABOUT UPOV
                 <svg class="dropdown-icon" width="8" height="5" viewBox="0 0 8 5" fill="#DADE14" xmlns="http://www.w3.org/2000/svg">
                   <polygon points="0,0 8,0 4,5"/>
                 </svg>
               </button>
-              <div class="dropdown-menu" [class.active]="activeDropdown === 'aboutUpov'">
-                <a href="#" class="dropdown-link">Overview</a>
-                <a href="#" class="dropdown-link">News</a>
-                <a href="#" class="dropdown-link">Newsletter</a>
-                <a href="#" class="dropdown-link">Press Releases</a>
-                <a href="#" class="dropdown-link">Members</a>
-                <a href="#" class="dropdown-link">Observers</a>
-                <a href="#" class="dropdown-link">Meetings & Events</a>
-                <a href="#" class="dropdown-link">Publications</a>
-                <a href="#" class="dropdown-link">Job opportunities</a>
-              </div>
+              <mat-menu #aboutUpovMenu="matMenu" class="dropdown-menu upov-dropdown simple-menu">
+                <div class="dropdown-content" (click)="$event.stopPropagation()">
+                  <a href="#" class="dropdown-link">Overview</a>
+                  <a href="#" class="dropdown-link">News</a>
+                  <a href="#" class="dropdown-link">Newsletter</a>
+                  <a href="#" class="dropdown-link">Press Releases</a>
+                  <a href="#" class="dropdown-link">Members</a>
+                  <a href="#" class="dropdown-link">Observers</a>
+                  <a href="#" class="dropdown-link">Meetings & Events</a>
+                  <a href="#" class="dropdown-link">Publications</a>
+                  <a href="#" class="dropdown-link">Job opportunities</a>
+                </div>
+              </mat-menu>
             </li>
           </ul>
           
-          <button class="search-btn" aria-label="Search">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.35-4.35"></path>
-            </svg>
+          <button mat-icon-button class="search-btn" aria-label="Search">
+            <mat-icon>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+            </mat-icon>
           </button>
         </nav>
       </div>
-    </div>
+    </mat-toolbar>
   </div>
 </header>
 <!-- Header end -->
