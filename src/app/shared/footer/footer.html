@@ -14,36 +14,40 @@
         <p class="footer-description">{{ translations.description }}</p>
         
         <!-- Social Media Icons -->
-        <div class="footer-social">
-          <a href="https://x.com/upovint" 
-             target="_blank" 
-             aria-label="X (Twitter)"
-             mat-icon-button
-             class="social-icon-button">
-            <mat-icon svgIcon="x-twitter"></mat-icon>
-          </a>
-          <a href="https://www.linkedin.com/company/upov-official" 
-             target="_blank" 
-             aria-label="LinkedIn"
-             mat-icon-button
-             class="social-icon-button">
-            <mat-icon svgIcon="linkedin"></mat-icon>
-          </a>
-          <a href="https://www.youtube.com/upov" 
-             target="_blank" 
-             aria-label="YouTube"
-             mat-icon-button
-             class="social-icon-button">
-            <mat-icon svgIcon="youtube"></mat-icon>
-          </a>
-          <a href="https://www.linkedin.com/build-relation/newsletter-follow?entityUrn=7254478502912053248" 
-             target="_blank" 
-             aria-label="Email"
-             mat-icon-button
-             class="social-icon-button">
-            <mat-icon svgIcon="email-custom"></mat-icon>
-          </a>
-        </div>
+       <div class="footer-social">
+  <button
+    mat-icon-button
+    class="social-icon-button"
+    aria-label="X (Twitter)"
+    (click)="openLink('https://x.com/upovint')">
+    <mat-icon svgIcon="x-twitter"></mat-icon>
+  </button>
+
+  <button
+    mat-icon-button
+    class="social-icon-button"
+    aria-label="LinkedIn"
+    (click)="openLink('https://www.linkedin.com/company/upov-official')">
+    <mat-icon svgIcon="linkedin"></mat-icon>
+  </button>
+
+  <button
+    mat-icon-button
+    class="social-icon-button"
+    aria-label="YouTube"
+    (click)="openLink('https://www.youtube.com/upov')">
+    <mat-icon svgIcon="youtube"></mat-icon>
+  </button>
+
+  <button
+    mat-icon-button
+    class="social-icon-button"
+    aria-label="Email"
+    (click)="openLink('https://www.linkedin.com/build-relation/newsletter-follow?entityUrn=7254478502912053248')">
+    <mat-icon svgIcon="email-custom"></mat-icon>
+  </button>
+</div>
+
         
         <!-- Divider Line -->
         <mat-divider class="footer-divider"></mat-divider>

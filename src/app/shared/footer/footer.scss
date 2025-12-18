@@ -76,7 +76,11 @@
     ::ng-deep .mat-mdc-button-touch-target {
       display: none;
     }
-    
+    /* FORCE SVG ICON COLOR INSIDE MAT-ICON */
+::ng-deep .social-icon-button mat-icon svg {
+  fill: #ffffff !important;
+}
+
     // Center the icon
     ::ng-deep .mat-mdc-button-persistent-ripple {
       border-radius: 50%;

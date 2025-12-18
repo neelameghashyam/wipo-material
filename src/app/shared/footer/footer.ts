@@ -67,6 +67,9 @@ export class Footer implements OnInit {
       )
     );
   }
+openLink(url: string) {
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
 
   // Translated strings
   get translations() {
