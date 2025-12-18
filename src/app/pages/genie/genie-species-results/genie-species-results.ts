@@ -1,8 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,35 +13,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSelectModule } from '@angular/material/select';
 import { debounceTime, distinctUntilChanged, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { Footer } from "../../../shared/footer/footer";
-import { Header } from "../../../shared/header/header";
-
-interface FilterOptions {
-  families: string[];
-  genera: string[];
-  regions: string[];
-}
-
-interface ActiveFilters {
-  families: string[];
-  genera: string[];
-  regions: string[];
-  cropTypes: string[];
-}
-
-export interface SpeciesDto {
-  genieId: string;
-  upovCode: string;
-  botanicalName?: string;
-  commonName?: string;
-  family?: string;
-  genus?: string;
-  region?: string;
-  type?: 'species' | 'authority';
-  updated?: boolean;
-  imageUrl?: string;
-  fullDetails?: any;
-}
+import { SearchResultDto, SpeciesDto, FilterOptions, ActiveFilters } from '../genie.types';
 
 @Component({
   selector: 'app-genie-species-results',
@@ -59,18 +30,18 @@ export interface SpeciesDto {
     MatChipsModule,
     MatSnackBarModule,
     MatButtonToggleModule,
-    MatSelectModule,
-    Footer,
-    Header
+    MatSelectModule
   ],
   templateUrl: './genie-species-results.html',
   styleUrl: './genie-species-results.scss',
 })
 export class GenieSpeciesResults implements OnInit {
+  @Input() searchQuery: string = '';
+  @Input() initialResults: SpeciesDto[] = [];
+  @Output() backToHome = new EventEmitter<void>();
+  
   private http = inject(HttpClient);
   private snackBar = inject(MatSnackBar);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
   
   private readonly API_BASE_URL = 'http://localhost:8000/api/v1';
   
@@ -103,23 +74,14 @@ export class GenieSpeciesResults implements OnInit {
   filteredRegions: string[] = [];
 
   ngOnInit() {
-    this.route.queryParams.subscribe(params => {
-      if (params['q']) {
-        this.searchControl.setValue(params['q']);
-        this.performSearch(params['q']);
-      }
-    });
-
-    const navigation = this.router.getCurrentNavigation();
-    if (navigation?.extras?.state?.['results']) {
-      this.searchResults = navigation.extras.state['results'];
-      this.totalResults = this.searchResults.length;
+    this.searchControl.setValue(this.searchQuery);
+    
+    if (this.initialResults && this.initialResults.length > 0) {
+      this.searchResults = this.initialResults;
+      this.totalResults = this.initialResults.length;
+    } else {
+      this.performSearch(this.searchQuery);
     }
-
-    // if (navigation?.extras?.state?.['selectedSpecies']) {
-    //   this.selectedSpecies = navigation.extras.state['selectedSpecies'];
-    //   this.loadSpeciesDetails(this.selectedSpecies.genieId);
-    // }
 
     this.setupFilterSearch();
   }
@@ -270,7 +232,7 @@ export class GenieSpeciesResults implements OnInit {
   }
 
   clearSearch() {
-    this.router.navigate(['/genie']);
+    this.backToHome.emit();
   }
 
   toggleFilters() {

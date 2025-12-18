@@ -6,159 +6,186 @@
   <!-- ================= MAIN CONTENT ================= -->
   <div class="upov-content">
 
-    <!-- ================= SEARCH BLOCK ================= -->
-    <section class="search-block" [class.authorities-mode]="searchTypeControl.value === 'authorities'">
+    <!-- ================= SHOW SEARCH BLOCK AND LATEST SPECIES ONLY WHEN NOT IN RESULTS MODE ================= -->
+    <ng-container *ngIf="!showResults">
+      
+      <!-- ================= SEARCH BLOCK ================= -->
+      <section class="search-block" [class.authorities-mode]="searchTypeControl.value === 'authorities'">
 
-      <div class="search-inner">
+        <div class="search-inner">
 
-        <div class="search-header">
-          <h1 class="page-title">GENIE Database</h1>
+          <div class="search-header">
+            <h1 class="page-title">GENIE Database</h1>
 
-          <p class="page-subtitle">
-            Search by specie or authority
-          </p>
+            <p class="page-subtitle">
+              Search by specie or authority
+            </p>
 
-          <p class="page-hint">
-            You can search in English, German, Spanish or French.
-          </p>
-        </div>
-
-        <!-- ================= SEARCH BAR ================= -->
-        <div class="search-wrapper">
-
-          <div
-            class="search-input-container"
-            [class.autocomplete-open]="showAutocomplete && searchResults.length > 0"
-          >
-
-            <mat-icon class="search-icon">search</mat-icon>
-
-            <input
-              type="text"
-              class="search-input"
-              [formControl]="searchControl"
-              placeholder="Search by UPOV code, botanical name or common name..."
-              autocomplete="off"
-              (blur)="hideAutocomplete()"
-            />
-
-            <!-- Clear -->
-            <button
-              class="clear-btn"
-              *ngIf="searchControl.value"
-              (click)="searchControl.setValue('')"
-              type="button">
-              <mat-icon>close</mat-icon>
-            </button>
-
-            <span
-              class="clear-text"
-              *ngIf="searchControl.value"
-              (click)="searchControl.setValue('')">
-              Clear
-            </span>
-
-            <!-- Toggle -->
-            <div class="search-toggle">
-              <mat-button-toggle-group
-                [formControl]="searchTypeControl"
-                class="toggle-group"
-                [hideSingleSelectionIndicator]="true">
-                <mat-button-toggle value="species">Species</mat-button-toggle>
-                <mat-button-toggle value="authorities">Authorities</mat-button-toggle>
-              </mat-button-toggle-group>
-            </div>
-
-            <!-- Autocomplete -->
-            <div
-              class="autocomplete-dropdown"
-              *ngIf="showAutocomplete && searchControl.value && searchControl.value.length >= 1">
-              
-              <div
-                class="autocomplete-results"
-                *ngIf="!isSearching && searchResults.length > 0">
-
-                <div
-                  class="autocomplete-item"
-                  *ngFor="let item of searchResults.slice(0, 8)"
-                  (mousedown)="selectSpecies(item)">
-                  <div class="autocomplete-main">
-                    {{ searchTypeControl.value === 'species' ? item.upovCode : item.name }}
-                  </div>
-                  <div class="autocomplete-sub">
-                    {{ searchTypeControl.value === 'species' ? item.botanicalName : item.isoCode }}
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
+            <p class="page-hint">
+              You can search in English, German, Spanish or French.
+            </p>
           </div>
 
-          <!-- Search button -->
-          <button
-            mat-raised-button
-            class="search-btn"
-            (click)="onSearchSubmit()">
-            Search
-          </button>
+          <!-- ================= SEARCH BAR ================= -->
+          <div class="search-wrapper">
 
-        </div>
-      </div>
-    </section>
+            <div
+              class="search-input-container"
+              [class.autocomplete-open]="showAutocomplete && searchResults.length > 0"
+            >
 
-    <!-- ================= PADDED CONTENT ================= -->
-    <div class="container-fluid">
+              <mat-icon class="search-icon">search</mat-icon>
 
-      <!-- ================= LATEST UPDATED SPECIES ================= -->
-      <section class="latest-section">
+              <input
+                type="text"
+                class="search-input"
+                [formControl]="searchControl"
+                placeholder="Search by UPOV code, botanical name or common name..."
+                autocomplete="off"
+                (blur)="hideAutocomplete()"
+              />
 
-        <div class="species-header">
-          <h2 class="species-header-title">Latest updated species</h2>
-        </div>
+              <!-- Clear -->
+              <button
+                class="clear-btn"
+                *ngIf="searchControl.value"
+                (click)="searchControl.setValue('')"
+                type="button">
+                <mat-icon>close</mat-icon>
+              </button>
 
-        <div class="species-grid">
-          <div
-            class="species-card"
-            *ngFor="let species of latestSpecies"
-            (click)="selectSpecies(species)">
+              <span
+                class="clear-text"
+                *ngIf="searchControl.value"
+                (click)="searchControl.setValue('')">
+                Clear
+              </span>
 
-            <div class="species-content">
-              <div class="species-code-row">
-                <mat-icon class="species-icon">spa</mat-icon>
-                <span class="species-code">{{ species.upovCode }}</span>
+              <!-- Toggle -->
+              <div class="search-toggle">
+                <mat-button-toggle-group
+                  [formControl]="searchTypeControl"
+                  class="toggle-group"
+                  [hideSingleSelectionIndicator]="true">
+                  <mat-button-toggle value="species">Species</mat-button-toggle>
+                  <mat-button-toggle value="authorities">Authorities</mat-button-toggle>
+                </mat-button-toggle-group>
               </div>
 
-              <h3 class="species-name">{{ species.botanicalName }}</h3>
-              <p class="species-common" *ngIf="species.commonName">
-                {{ species.commonName }}
-              </p>
-              <p class="species-family" *ngIf="species.family">
-                {{ species.family }}
-              </p>
-            </div>
-
-            <div class="species-image-wrapper">
-              <img
-                *ngIf="species.imageUrl"
-                [src]="species.imageUrl"
-                [alt]="species.botanicalName"
-                class="species-image" />
-
+              <!-- Autocomplete -->
               <div
-                *ngIf="!species.imageUrl"
-                class="species-placeholder-image">
-                <span class="no-image-text">No image<br />available</span>
+                class="autocomplete-dropdown"
+                *ngIf="showAutocomplete && searchControl.value && searchControl.value.length >= 1">
+                
+                <div
+                  class="autocomplete-results"
+                  *ngIf="!isSearching && searchResults.length > 0">
+
+                  <div
+                    class="autocomplete-item"
+                    *ngFor="let item of searchResults.slice(0, 8)"
+                    (mousedown)="selectSpecies(item)">
+                    <div class="autocomplete-main">
+                      {{ searchTypeControl.value === 'species' ? item.upovCode : item.name }}
+                    </div>
+                    <div class="autocomplete-sub">
+                      {{ searchTypeControl.value === 'species' ? item.botanicalName : item.isoCode }}
+                    </div>
+                  </div>
+                </div>
+
               </div>
 
-              <span class="updated-badge">Updated</span>
             </div>
+
+            <!-- Search button -->
+            <button
+              mat-raised-button
+              class="search-btn"
+              (click)="onSearchSubmit()">
+              Search
+            </button>
 
           </div>
         </div>
       </section>
 
-    </div>
+      <!-- ================= PADDED CONTENT ================= -->
+      <div class="container-fluid">
+
+        <!-- ================= LATEST UPDATED SPECIES ================= -->
+        <section class="latest-section">
+
+          <div class="species-header">
+            <h2 class="species-header-title">Latest updated species</h2>
+          </div>
+
+          <div class="species-grid">
+            <div
+              class="species-card"
+              *ngFor="let species of latestSpecies"
+              (click)="selectSpecies(species)">
+
+              <div class="species-content">
+                <div class="species-code-row">
+                  <mat-icon class="species-icon">spa</mat-icon>
+                  <span class="species-code">{{ species.upovCode }}</span>
+                </div>
+
+                <h3 class="species-name">{{ species.botanicalName }}</h3>
+                <p class="species-common" *ngIf="species.commonName">
+                  {{ species.commonName }}
+                </p>
+                <p class="species-family" *ngIf="species.family">
+                  {{ species.family }}
+                </p>
+              </div>
+
+              <div class="species-image-wrapper">
+                <img
+                  *ngIf="species.imageUrl"
+                  [src]="species.imageUrl"
+                  [alt]="species.botanicalName"
+                  class="species-image" />
+
+                <div
+                  *ngIf="!species.imageUrl"
+                  class="species-placeholder-image">
+                  <span class="no-image-text">No image<br />available</span>
+                </div>
+
+                <span class="updated-badge">Updated</span>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+      </div>
+      
+    </ng-container>
+
+    <!-- ================= RESULTS COMPONENTS ================= -->
+    <ng-container *ngIf="showResults">
+      
+      <!-- Species Results -->
+      <app-genie-species-results 
+        *ngIf="currentSearchType === 'species'"
+        [searchQuery]="searchQuery"
+        [initialResults]="searchResults"
+        (backToHome)="onBackToHome()"
+      ></app-genie-species-results>
+
+      <!-- Authority Results -->
+      <app-genie-authority-results 
+        *ngIf="currentSearchType === 'authorities'"
+        [searchQuery]="searchQuery"
+        [initialResults]="searchResults"
+        (backToHome)="onBackToHome()"
+      ></app-genie-authority-results>
+
+    </ng-container>
+
   </div>
 
   <!-- ================= FOOTER ================= -->

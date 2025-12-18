@@ -2,39 +2,20 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { debounceTime, distinctUntilChanged, map, startWith, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { Footer } from "../../shared/footer/footer";
 import { Header } from "../../shared/header/header";
-
-export interface SpeciesDto {
-  genieId: string;
-  upovCode: string;
-  botanicalName?: string;
-  commonName?: string;
-  family?: string;
-  genus?: string;
-  region?: string;
-  type?: 'species' | 'authority';
-  updated?: boolean;
-  imageUrl?: string;
-  fullDetails?: any;
-  authorityId?: number;
-  name?: string;
-  isoCode?: string;
-  administrativeWebsite?: string;
-  lawWebsite?: string;
-}
+import { GenieSpeciesResults } from './genie-species-results/genie-species-results';
+import { GenieAuthorityResults } from './genie-authority-results/genie-authority-results';
+import { SearchResultDto } from './genie.types';
 
 @Component({
   selector: 'app-genie',
@@ -46,14 +27,14 @@ export interface SpeciesDto {
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatCardModule,
     MatProgressSpinnerModule,
     MatIconModule,
-    MatChipsModule,
     MatSnackBarModule,
     MatButtonToggleModule,
     Footer,
-    Header
+    Header,
+    GenieSpeciesResults,
+    GenieAuthorityResults
   ],
   templateUrl: './genie.html',
   styleUrl: './genie.scss',
@@ -61,16 +42,20 @@ export interface SpeciesDto {
 export class Genie implements OnInit {
   private http = inject(HttpClient);
   private snackBar = inject(MatSnackBar);
-  private router = inject(Router);
   
   private readonly API_BASE_URL = 'http://localhost:8000/api/v1';
   
   searchControl = new FormControl('');
   searchTypeControl = new FormControl('species');
-  searchResults: SpeciesDto[] = [];
+  searchResults: SearchResultDto[] = [];
   showAutocomplete = false;
-  latestSpecies: SpeciesDto[] = [];
+  latestSpecies: SearchResultDto[] = [];
   isSearching = false;
+  
+  // State management for showing results
+  showResults = false;
+  searchQuery = '';
+  currentSearchType: 'species' | 'authorities' = 'species';
 
   ngOnInit() {
     this.setupSearchListener();
@@ -199,33 +184,40 @@ export class Genie implements OnInit {
     return `https://flagcdn.com/w80/${isoCode.toLowerCase()}.png`;
   }
 
-  selectSpecies(species: SpeciesDto) {
-    // Navigate to appropriate results page with species data
-    if (species.type === 'species') {
-      this.router.navigate(['/genie/species'], {
-        state: { selectedSpecies: species }
-      });
-    }
+  selectSpecies(species: SearchResultDto) {
+    // Show results component with selected species
+    this.showResults = true;
+    this.searchQuery = species.upovCode;
+    this.currentSearchType = species.type === 'species' ? 'species' : 'authorities';
+    this.searchControl.setValue(this.searchQuery);
+    this.showAutocomplete = false;
   }
 
   onSearchSubmit() {
     const query = this.searchControl.value?.trim();
     if (query && query.length >= 2) {
       this.showAutocomplete = false;
+      this.showResults = true;
+      this.searchQuery = query;
+      this.currentSearchType = this.searchTypeControl.value === 'species' ? 'species' : 'authorities';
       
-      const searchType = this.searchTypeControl.value;
-      if (searchType === 'species') {
-        this.router.navigate(['/genie/species'], {
-          queryParams: { q: query },
-          state: { results: this.searchResults }
-        });
-      } else {
-        this.router.navigate(['/genie/authorities'], {
-          queryParams: { q: query },
-          state: { results: this.searchResults }
-        });
-      }
+      // Update URL without navigation
+      window.history.pushState(
+        {}, 
+        '', 
+        `/genie?q=${encodeURIComponent(query)}&type=${this.currentSearchType}`
+      );
     }
+  }
+
+  onBackToHome() {
+    this.showResults = false;
+    this.searchControl.setValue('');
+    this.searchQuery = '';
+    this.searchResults = [];
+    
+    // Update URL
+    window.history.pushState({}, '', '/genie');
   }
 
   hideAutocomplete() {

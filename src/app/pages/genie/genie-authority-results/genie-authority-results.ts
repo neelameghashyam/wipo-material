@@ -1,8 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,22 +11,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { Footer } from "../../../shared/footer/footer";
-import { Header } from "../../../shared/header/header";
-
-export interface AuthorityDto {
-  genieId: string;
-  upovCode: string;
-  botanicalName?: string;
-  type?: 'authority';
-  imageUrl?: string;
-  authorityId?: number;
-  name?: string;
-  isoCode?: string;
-  administrativeWebsite?: string;
-  lawWebsite?: string;
-  fullDetails?: any;
-}
+import { SearchResultDto, AuthorityDto } from '../genie.types';
 
 @Component({
   selector: 'app-genie-authority-results',
@@ -42,18 +26,18 @@ export interface AuthorityDto {
     MatCardModule,
     MatIconModule,
     MatChipsModule,
-    MatSnackBarModule,
-    Footer,
-    Header
+    MatSnackBarModule
   ],
   templateUrl: './genie-authority-results.html',
   styleUrl: './genie-authority-results.scss',
 })
 export class GenieAuthorityResults implements OnInit {
+  @Input() searchQuery: string = '';
+  @Input() initialResults: AuthorityDto[] = [];
+  @Output() backToHome = new EventEmitter<void>();
+  
   private http = inject(HttpClient);
   private snackBar = inject(MatSnackBar);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
   
   private readonly API_BASE_URL = 'http://localhost:8000/api/v1';
   
@@ -67,17 +51,13 @@ export class GenieAuthorityResults implements OnInit {
   itemsPerPage = 15;
 
   ngOnInit() {
-    this.route.queryParams.subscribe(params => {
-      if (params['q']) {
-        this.searchControl.setValue(params['q']);
-        this.performSearch(params['q']);
-      }
-    });
-
-    const navigation = this.router.getCurrentNavigation();
-    if (navigation?.extras?.state?.['results']) {
-      this.searchResults = navigation.extras.state['results'];
-      this.totalResults = this.searchResults.length;
+    this.searchControl.setValue(this.searchQuery);
+    
+    if (this.initialResults && this.initialResults.length > 0) {
+      this.searchResults = this.initialResults;
+      this.totalResults = this.initialResults.length;
+    } else {
+      this.performSearch(this.searchQuery);
     }
   }
 
@@ -151,7 +131,7 @@ export class GenieAuthorityResults implements OnInit {
   }
 
   clearSearch() {
-    this.router.navigate(['/genie']);
+    this.backToHome.emit();
   }
 
   shouldShowEmptyState(): boolean {
