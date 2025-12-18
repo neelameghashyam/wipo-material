@@ -1,0 +1,265 @@
+<div class="genie-container">
+
+  <!-- ================= HEADER ================= -->
+  <app-header></app-header>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <div class="upov-content">
+
+    <!-- ================= PADDED CONTENT ================= -->
+    <div class="container-fluid">
+
+      <!-- ================= SEARCH RESULTS ================= -->
+      <section class="results-layout">
+
+        <!-- ===== Results Header ===== -->
+        <div class="results-header" *ngIf="totalResults > 0">
+
+          <h2 class="results-title">
+            Found {{ totalResults }} result{{ totalResults !== 1 ? 's' : '' }}
+            for "<span class="results-query">{{ searchControl.value }}</span>"
+          </h2>
+
+        </div>
+
+        <!-- ===== Results Body ===== -->
+        <div class="results-body">
+
+          <!-- ===== EMPTY STATE ===== -->
+          <div class="empty-state" *ngIf="shouldShowEmptyState()">
+            <div class="empty-content">
+
+              <img
+                src="assets/icons/flower-no-results.svg"
+                alt="No results"
+                class="empty-icon"
+              />
+
+              <p class="empty-title">
+                No results found for "<strong>{{ searchControl.value }}</strong>"
+              </p>
+
+              <p class="empty-subtitle">
+                Try searching with different keywords.
+              </p>
+
+            </div>
+          </div>
+
+          <!-- ===== AUTHORITY RESULTS GRID ===== -->
+          <div
+            class="authority-grid"
+            *ngIf="totalResults > 0"
+          >
+            <div
+              class="species-card authority-card"
+              *ngFor="let item of getPaginatedResults()"
+              (click)="selectAuthority(item)"
+            >
+              <!-- AUTHORITY LAYOUT -->
+              <div class="authority-content">
+
+                <!-- Header -->
+                <div class="authority-header">
+                  <h3 class="authority-title">{{ item.name }}</h3>
+                  <span class="authority-badge">All genera and species</span>
+                </div>
+
+                <!-- Details (2 × 2 grid) -->
+                <div class="authority-details-grid">
+
+                  <!-- LEFT -->
+                  <div class="authority-col">
+                    <div class="authority-detail-row">
+                      <mat-icon class="authority-icon">language</mat-icon>
+                      <span class="authority-text website">
+                        {{ getAuthorityWebsite(item) }}
+                      </span>
+                    </div>
+
+                    <div class="authority-detail-row">
+                      <mat-icon class="authority-icon">gavel</mat-icon>
+                      <span class="authority-text website">
+                        {{ getAuthorityLawWebsite(item) }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- RIGHT -->
+                  <div class="authority-col">
+                    <div class="authority-detail-row">
+                      <mat-icon class="authority-icon">public</mat-icon>
+                      <span class="authority-text">
+                        {{ getAuthorityIsoCode(item) }}
+                      </span>
+                    </div>
+
+                    <div class="authority-detail-row">
+                      <mat-icon class="authority-icon">location_on</mat-icon>
+                      <span class="authority-text">
+                        {{ getAuthorityName(item) }}
+                      </span>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Flag -->
+              <div class="authority-flag-wrapper">
+                <img
+                  *ngIf="item.imageUrl"
+                  class="authority-flag"
+                  [src]="item.imageUrl"
+                  [alt]="item.name"
+                  (error)="item.imageUrl = ''"
+                />
+                <div *ngIf="!item.imageUrl" class="authority-flag-placeholder">
+                  <span class="flag-na">N/A</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ================= PAGINATION ================= -->
+      <div class="pagination" *ngIf="shouldShowPagination()">
+        <div class="pagination-inner">
+
+          <!-- First -->
+          <button
+            class="page-btn nav-btn"
+            [disabled]="currentPage === 1"
+            (click)="changePage(1)">
+            <mat-icon class="chevron double">keyboard_double_arrow_left</mat-icon>
+          </button>
+
+          <!-- Previous -->
+          <button
+            class="page-btn nav-btn"
+            [disabled]="currentPage === 1"
+            (click)="changePage(currentPage - 1)">
+            <mat-icon class="chevron">chevron_left</mat-icon>
+          </button>
+
+          <!-- Page numbers -->
+          <ng-container *ngFor="let page of getPageNumbers()">
+
+            <button
+              *ngIf="page !== '...'"
+              class="page-btn page-number"
+              [class.active]="page === currentPage"
+              (click)="goToPage(page)">
+              {{ page }}
+            </button>
+
+            <span *ngIf="page === '...'" class="page-dots">…</span>
+
+          </ng-container>
+
+          <!-- Page info (BOXED like Figma) -->
+          <div class="page-info-wrapper">
+
+            <button
+              class="page-btn page-info-btn"
+              type="button"
+              (click)="togglePageDropdown()"
+            >
+              <span class="page-info-text">
+                {{ currentPage }} of {{ getTotalPages() }}
+              </span>
+              <mat-icon class="page-info-icon">expand_more</mat-icon>
+            </button>
+
+            <!-- Dropdown -->
+            <div
+              class="page-dropdown"
+              *ngIf="showPageDropdown"
+            >
+              <button
+                class="page-dropdown-item"
+                *ngFor="let page of getAllPages()"
+                [class.active]="page === currentPage"
+                (click)="goToPageFromDropdown(page)"
+              >
+                {{ page }}
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Next -->
+          <button
+            class="page-btn nav-btn"
+            [disabled]="currentPage === getTotalPages()"
+            (click)="changePage(currentPage + 1)">
+            <mat-icon class="chevron">chevron_right</mat-icon>
+          </button>
+
+          <!-- Last -->
+          <button
+            class="page-btn nav-btn"
+            [disabled]="currentPage === getTotalPages()"
+            (click)="changePage(getTotalPages())">
+            <mat-icon class="chevron double">keyboard_double_arrow_right</mat-icon>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- ================= DETAILS CARD ================= -->
+      <mat-card
+        class="details-card"
+        *ngIf="selectedAuthority">
+
+        <mat-card-header>
+          <mat-card-title>Authority Details</mat-card-title>
+
+          <button mat-icon-button (click)="clearSearch()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="details-content">
+
+            <div class="detail-row">
+              <span class="label">Authority ID</span>
+              <mat-chip>{{ selectedAuthority.genieId }}</mat-chip>
+            </div>
+
+            <div class="detail-row">
+              <span class="label">ISO Code</span>
+              <mat-chip highlighted>
+                {{ selectedAuthority.upovCode }}
+              </mat-chip>
+            </div>
+
+            <div class="detail-row" *ngIf="selectedAuthority.botanicalName">
+              <span class="label">Name</span>
+              <mat-chip>{{ selectedAuthority.botanicalName }}</mat-chip>
+            </div>
+
+            <div class="detail-row" *ngIf="selectedAuthority.administrativeWebsite">
+              <span class="label">Website</span>
+              <mat-chip>{{ selectedAuthority.administrativeWebsite }}</mat-chip>
+            </div>
+
+            <div class="detail-row" *ngIf="selectedAuthority.lawWebsite">
+              <span class="label">Law Website</span>
+              <mat-chip>{{ selectedAuthority.lawWebsite }}</mat-chip>
+            </div>
+
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <app-footer></app-footer>
+</div>

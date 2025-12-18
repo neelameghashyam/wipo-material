@@ -1,0 +1,341 @@
+<div class="genie-container">
+
+  <!-- ================= HEADER ================= -->
+  <app-header></app-header>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <div class="upov-content">
+
+    <!-- ================= PADDED CONTENT ================= -->
+    <div class="container-fluid">
+
+      <!-- ================= SEARCH RESULTS ================= -->
+      <section class="results-layout">
+
+        <!-- ===== Results Header ===== -->
+        <div class="results-header" *ngIf="shouldShowResultsHeader()">
+
+          <h2 class="results-title">
+            Found {{ totalResults }} result{{ totalResults !== 1 ? 's' : '' }}
+            for "<span class="results-query">{{ searchControl.value }}</span>"
+          </h2>
+
+          <button
+            type="button"
+            class="filter-btn"
+            (click)="toggleFilters()"
+            *ngIf="shouldShowFiltersButton()"
+          >
+            <mat-icon class="filter-icon">filter_list</mat-icon>
+            <span class="filter-text">
+              {{ showFilters ? 'Hide filters' : 'Show filters' }}
+            </span>
+          </button>
+        </div>
+
+        <!-- ===== Filters Row (DROPDOWNS) ===== -->
+        <div class="filters-row" *ngIf="showFilters && shouldShowFiltersButton()">
+
+          <!-- Family -->
+          <mat-select
+            class="filter-select"
+            placeholder="Family"
+            multiple
+            (selectionChange)="applyFiltersToResults()"
+            [(value)]="activeFilters.families"
+          >
+            <mat-option
+              *ngFor="let family of filterOptions.families"
+              [value]="family"
+            >
+              {{ family }}
+            </mat-option>
+          </mat-select>
+
+          <!-- Genus -->
+          <mat-select
+            class="filter-select"
+            placeholder="Genus"
+            multiple
+            (selectionChange)="applyFiltersToResults()"
+            [(value)]="activeFilters.genera"
+          >
+            <mat-option
+              *ngFor="let genus of filterOptions.genera"
+              [value]="genus"
+            >
+              {{ genus }}
+            </mat-option>
+          </mat-select>
+
+          <!-- Crop type -->
+          <mat-select
+            class="filter-select"
+            placeholder="Crop type"
+            multiple
+            (selectionChange)="applyFiltersToResults()"
+            [(value)]="activeFilters.cropTypes"
+          >
+            <mat-option value="oilseed">Oilseed</mat-option>
+            <mat-option value="vegetable">Vegetable</mat-option>
+            <mat-option value="forage">Forage</mat-option>
+          </mat-select>
+
+        </div>
+
+        <!-- ===== Selected Filters Chips (BELOW DROPDOWNS) ===== -->
+        <div class="selected-filters" *ngIf="showFilters && getActiveFilterCount() > 0 && shouldShowFiltersButton()">
+          
+          <!-- Family chips -->
+          <div
+            class="filter-chip"
+            *ngFor="let family of activeFilters.families"
+          >
+            <span>{{ family }}</span>
+            <mat-icon
+              class="filter-chip-close"
+              (click)="removeFilter('families', family)"
+            >close</mat-icon>
+          </div>
+
+          <!-- Genus chips -->
+          <div
+            class="filter-chip"
+            *ngFor="let genus of activeFilters.genera"
+          >
+            <span>{{ genus }}</span>
+            <mat-icon
+              class="filter-chip-close"
+              (click)="removeFilter('genera', genus)"
+            >close</mat-icon>
+          </div>
+
+          <!-- Crop type chips -->
+          <div
+            class="filter-chip"
+            *ngFor="let cropType of activeFilters.cropTypes"
+          >
+            <span>{{ cropType }}</span>
+            <mat-icon
+              class="filter-chip-close"
+              (click)="removeFilter('cropTypes', cropType)"
+            >close</mat-icon>
+          </div>
+
+          <!-- Clear all button -->
+          <button
+            class="clear-all-btn"
+            (click)="resetFilters()"
+          >
+            <mat-icon class="clear-all-icon">close</mat-icon>
+            <span>Clear all</span>
+          </button>
+
+        </div>
+
+        <!-- ===== Results Body ===== -->
+        <div class="results-body">
+
+          <!-- ===== EMPTY STATE ===== -->
+          <div class="empty-state" *ngIf="shouldShowEmptyState()">
+            <div class="empty-content">
+
+              <img
+                src="assets/icons/flower-no-results.svg"
+                alt="No results"
+                class="empty-icon"
+              />
+
+              <p class="empty-title">
+                No results found for "<strong>{{ searchControl.value }}</strong>"
+              </p>
+
+              <p class="empty-subtitle">
+                Try searching with different keywords.
+              </p>
+
+            </div>
+          </div>
+
+          <!-- ===== RESULTS GRID ===== -->
+          <div
+            class="species-grid"
+            *ngIf="totalResults > 0"
+          >
+            <div
+              class="species-card"
+              *ngFor="let item of getPaginatedResults()"
+              (click)="selectSpecies(item)"
+            >
+              <!-- SPECIES LAYOUT -->
+              <div class="species-content">
+                <div class="species-code-row">
+                  <mat-icon class="species-icon">spa</mat-icon>
+                  <span class="species-code">{{ item.upovCode }}</span>
+                </div>
+
+                <h3 class="species-name">{{ item.botanicalName }}</h3>
+
+                <p class="species-common" *ngIf="item.commonName">
+                  {{ item.commonName }}
+                </p>
+
+                <p class="species-family" *ngIf="item.family">
+                  {{ item.family }}
+                </p>
+              </div>
+
+              <div class="species-image-wrapper">
+                <img
+                  *ngIf="item.imageUrl"
+                  [src]="item.imageUrl"
+                  [alt]="item.botanicalName"
+                  class="species-image"
+                />
+
+                <div
+                  *ngIf="!item.imageUrl"
+                  class="species-placeholder-image"
+                >
+                  <span class="no-image-text">No image<br />available</span>
+                </div>
+
+                <span class="updated-badge" *ngIf="item.updated">
+                  Updated
+                </span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ================= PAGINATION ================= -->
+      <div class="pagination" *ngIf="shouldShowPagination()">
+        <div class="pagination-inner">
+
+          <!-- First -->
+          <button
+            class="page-btn nav-btn"
+            [disabled]="currentPage === 1"
+            (click)="changePage(1)">
+            <mat-icon class="chevron double">keyboard_double_arrow_left</mat-icon>
+          </button>
+
+          <!-- Previous -->
+          <button
+            class="page-btn nav-btn"
+            [disabled]="currentPage === 1"
+            (click)="changePage(currentPage - 1)">
+            <mat-icon class="chevron">chevron_left</mat-icon>
+          </button>
+
+          <!-- Page numbers -->
+          <ng-container *ngFor="let page of getPageNumbers()">
+
+            <button
+              *ngIf="page !== '...'"
+              class="page-btn page-number"
+              [class.active]="page === currentPage"
+              (click)="goToPage(page)">
+              {{ page }}
+            </button>
+
+            <span *ngIf="page === '...'" class="page-dots">…</span>
+
+          </ng-container>
+
+          <!-- Page info (BOXED like Figma) -->
+          <div class="page-info-wrapper">
+
+            <button
+              class="page-btn page-info-btn"
+              type="button"
+              (click)="togglePageDropdown()"
+            >
+              <span class="page-info-text">
+                {{ currentPage }} of {{ getTotalPages() }}
+              </span>
+              <mat-icon class="page-info-icon">expand_more</mat-icon>
+            </button>
+
+            <!-- Dropdown -->
+            <div
+              class="page-dropdown"
+              *ngIf="showPageDropdown"
+            >
+              <button
+                class="page-dropdown-item"
+                *ngFor="let page of getAllPages()"
+                [class.active]="page === currentPage"
+                (click)="goToPageFromDropdown(page)"
+              >
+                {{ page }}
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Next -->
+          <button
+            class="page-btn nav-btn"
+            [disabled]="currentPage === getTotalPages()"
+            (click)="changePage(currentPage + 1)">
+            <mat-icon class="chevron">chevron_right</mat-icon>
+          </button>
+
+          <!-- Last -->
+          <button
+            class="page-btn nav-btn"
+            [disabled]="currentPage === getTotalPages()"
+            (click)="changePage(getTotalPages())">
+            <mat-icon class="chevron double">keyboard_double_arrow_right</mat-icon>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- ================= DETAILS CARD ================= -->
+      <mat-card
+        class="details-card"
+        *ngIf="selectedSpecies">
+
+        <mat-card-header>
+          <mat-card-title>Species Details</mat-card-title>
+
+          <button mat-icon-button (click)="clearSearch()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="details-content">
+
+            <div class="detail-row">
+              <span class="label">GENIE ID</span>
+              <mat-chip>{{ selectedSpecies.genieId }}</mat-chip>
+            </div>
+
+            <div class="detail-row">
+              <span class="label">UPOV Code</span>
+              <mat-chip highlighted>
+                {{ selectedSpecies.upovCode }}
+              </mat-chip>
+            </div>
+
+            <div class="detail-row" *ngIf="selectedSpecies.botanicalName">
+              <span class="label">Name</span>
+              <mat-chip>{{ selectedSpecies.botanicalName }}</mat-chip>
+            </div>
+
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <app-footer></app-footer>
+</div>
