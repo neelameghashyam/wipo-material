@@ -1,0 +1,450 @@
+/* =========================================================
+   GENIE AUTHORITY RESULTS - STYLES
+   ========================================================= */
+
+:host {
+  display: block;
+}
+
+.genie-container {
+  min-height: 100vh;
+  background: #fafafa;
+  width: 1440px;
+  margin: 0 auto;
+  font-family: 'Figtree', 'Roboto', sans-serif;
+}
+
+.upov-content {
+  width: 100%;
+}
+
+.container-fluid {
+  width: 1440px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 40px 141px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* =========================================================
+   RESULTS LAYOUT
+   ========================================================= */
+.results-layout {
+  display: flex;
+  flex-direction: column;
+}
+
+.results-header {
+  width: 1158px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+
+.results-title {
+  font-family: 'Figtree', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: 0;
+  color: #1c4240;
+  margin: 0;
+  padding: 0;
+}
+
+.results-query {
+  font-weight: 700;
+}
+
+/* =========================================================
+   RESULTS BODY
+   ========================================================= */
+.results-body {
+  display: flex;
+}
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+.empty-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 325px;
+}
+
+.empty-content {
+  width: 525px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  text-align: center;
+}
+
+.empty-icon {
+  width: 64px;
+  height: 64px;
+}
+
+.empty-title {
+  font-family: 'Figtree', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1c4240;
+  margin: 0;
+}
+
+.empty-subtitle {
+  font-family: 'Figtree', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #1c4240;
+  margin: 0;
+
+  strong {
+    font-weight: 700;
+  }
+}
+
+/* =========================================================
+   AUTHORITY GRID
+   ========================================================= */
+.authority-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 557px);
+  gap: 24px;
+  align-items: start;
+}
+
+/* ================= AUTHORITY CARD ================= */
+.species-card {
+  cursor: pointer;
+}
+
+.authority-card {
+  position: relative;
+  width: 557px;
+  height: 126px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+/* ================= HEADER ================= */
+.authority-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.authority-title {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 100%;
+  color: #1c4240;
+  margin: 0;
+  text-decoration-line: underline;
+  text-decoration-color: #dade14;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.authority-badge {
+  height: 18px;
+  padding: 4px 10px;
+  background: #547f71;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: #ffffff;
+  width: 140px;
+}
+
+/* ================= DETAILS GRID ================= */
+.authority-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 24px;
+  row-gap: 8px;
+}
+
+.authority-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.authority-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 17px;
+  max-width: 100%;
+}
+
+.authority-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  color: #303030;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.authority-text {
+  font-family: 'Figtree', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 17px;
+  color: #303030;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.authority-text:not(.expanded) {
+  white-space: nowrap;
+}
+
+.authority-text.expanded {
+  white-space: normal;
+  word-break: break-all;
+}
+
+.authority-text.website {
+  color: #009a6e;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.authority-text.website:hover {
+  color: #007a56;
+}
+
+.expand-link {
+  color: #009a6e;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  white-space: nowrap;
+  margin-left: 4px;
+}
+
+.expand-link:hover {
+  color: #007a56;
+}
+
+/* ================= FLAG ================= */
+.authority-flag-wrapper {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.authority-flag {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.authority-flag-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d0d0d0;
+}
+
+.flag-na {
+  font-family: 'Figtree', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6f6f6f;
+  text-align: center;
+}
+
+/* =========================================================
+   DETAILS CARD
+   ========================================================= */
+.details-card {
+  margin-top: 32px;
+
+  ::ng-deep .mat-mdc-card-header {
+    background: #1c4240;
+    border-bottom: 3px solid #d4e834;
+    color: #fff;
+  }
+}
+
+/* =========================================================
+   PAGINATION
+   ========================================================= */
+.pagination {
+  width: 1158px;
+  height: 40px;
+  margin: 32px auto 0;
+  display: flex;
+  justify-content: center;
+  padding-right: 335px;
+}
+
+.pagination-inner {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.page-btn {
+  height: 40px;
+  min-width: 40px;
+  padding: 0 8px;
+  border-radius: 4px;
+  border: 1px solid #939600;
+  background: #ffffff;
+  color: #303030;
+  font-family: 'Figtree', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  box-sizing: border-box;
+
+  &:hover:not(:disabled):not(.active) {
+    background: rgba(218, 222, 20, 0.08);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+.page-number {
+  width: 40px;
+  padding: 0;
+
+  &.active {
+    background: #1c4240;
+    color: #dade14;
+    font-weight: 700;
+  }
+}
+
+.page-dots {
+  width: 40px;
+  text-align: center;
+  font-size: 16px;
+  color: #303030;
+}
+
+.page-info-btn {
+  padding: 0 12px;
+}
+
+.page-info-text {
+  white-space: nowrap;
+  font-size: 16px;
+}
+
+.page-info-icon {
+  font-size: 24px;
+  color: #1c4240;
+}
+
+.chevron {
+  font-size: 24px;
+  color: #1c4240;
+
+  &.double {
+    font-size: 24px;
+  }
+}
+
+.page-info-wrapper {
+  position: relative;
+}
+
+.page-dropdown {
+  position: absolute;
+  bottom: 46px;
+  left: 0;
+  min-width: 100%;
+  max-height: 200px;
+  background: #ffffff;
+  border: 1px solid #939600;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.page-dropdown-item {
+  height: 36px;
+  padding: 0 12px;
+  background: #ffffff;
+  border: none;
+  text-align: left;
+  font-family: 'Figtree', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #1c4240;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(218, 222, 20, 0.15);
+  }
+
+  &.active {
+    background: #1c4240;
+    color: #dade14;
+  }
+}
+
+/* =========================================================
+   MATERIAL GLOBAL OVERRIDES
+   ========================================================= */
+::ng-deep {
+  .mat-mdc-raised-button.mat-primary {
+    --mdc-protected-button-container-color: #1c4240;
+  }
+
+  mat-chip {
+    background: #e4f2e7;
+    border: 1px solid #1c4240;
+    color: #1c4240;
+  }
+
+  mat-chip[highlighted] {
+    background: #d4e834;
+  }
+}
