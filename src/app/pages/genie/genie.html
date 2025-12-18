@@ -6,8 +6,7 @@
   <!-- ================= MAIN CONTENT ================= -->
   <div class="upov-content">
 
-    <!-- ================= SHOW SEARCH BLOCK AND LATEST SPECIES ONLY WHEN NOT IN RESULTS MODE ================= -->
-    <ng-container *ngIf="!showResults">
+    <!-- ================= SEARCH BLOCK - ALWAYS VISIBLE ================= -->
       
       <!-- ================= SEARCH BLOCK ================= -->
       <section class="search-block" [class.authorities-mode]="searchTypeControl.value === 'authorities'">
@@ -163,8 +162,6 @@
 
       </div>
       
-    </ng-container>
-
     <!-- ================= RESULTS COMPONENTS ================= -->
     <ng-container *ngIf="showResults">
       

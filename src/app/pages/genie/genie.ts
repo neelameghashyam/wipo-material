@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -39,7 +39,7 @@ import { SearchResultDto } from './genie.types';
   templateUrl: './genie.html',
   styleUrl: './genie.scss',
 })
-export class Genie implements OnInit {
+export class Genie implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private snackBar = inject(MatSnackBar);
   
@@ -60,6 +60,48 @@ export class Genie implements OnInit {
   ngOnInit() {
     this.setupSearchListener();
     this.loadLatestSpecies();
+    
+    // Check URL params on init
+    this.checkUrlParams();
+    
+    // Handle browser back/forward button
+    window.addEventListener('popstate', () => {
+      this.checkUrlParams();
+    });
+  }
+
+  ngOnDestroy() {
+    // Clean up event listener
+    window.removeEventListener('popstate', () => {});
+  }
+
+  private checkUrlParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const query = urlParams.get('q');
+    const type = urlParams.get('type');
+    
+    if (query) {
+      this.searchControl.setValue(query);
+      this.searchQuery = query;
+      this.showResults = true;
+      
+      if (type === 'authorities') {
+        this.searchTypeControl.setValue('authorities');
+        this.currentSearchType = 'authorities';
+      } else {
+        this.searchTypeControl.setValue('species');
+        this.currentSearchType = 'species';
+      }
+      
+      // Trigger search
+      this.performSearch(query);
+    } else {
+      // No query param - show home view
+      this.showResults = false;
+      this.searchControl.setValue('');
+      this.searchQuery = '';
+      this.searchResults = [];
+    }
   }
 
   loadLatestSpecies() {
@@ -215,9 +257,37 @@ export class Genie implements OnInit {
     this.searchControl.setValue('');
     this.searchQuery = '';
     this.searchResults = [];
+    this.showAutocomplete = false;
     
     // Update URL
     window.history.pushState({}, '', '/genie');
+  }
+
+  // Handle search change from parent
+  onSearchChange() {
+    const query = this.searchControl.value?.trim();
+    if (query && query.length >= 2) {
+      this.showAutocomplete = false;
+      this.performSearch(query);
+      
+      // If already in results view, update the search
+      if (this.showResults) {
+        this.searchQuery = query;
+        this.currentSearchType = this.searchTypeControl.value === 'species' ? 'species' : 'authorities';
+        
+        // Update URL
+        window.history.pushState(
+          {}, 
+          '', 
+          `/genie?q=${encodeURIComponent(query)}&type=${this.currentSearchType}`
+        );
+      }
+    } else if (!query || query.length === 0) {
+      // If search is cleared, go back to home
+      if (this.showResults) {
+        this.onBackToHome();
+      }
+    }
   }
 
   hideAutocomplete() {
