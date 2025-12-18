@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, inject } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -9,6 +9,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { SearchResultDto, AuthorityDto } from '../genie.types';
@@ -26,14 +27,14 @@ import { SearchResultDto, AuthorityDto } from '../genie.types';
     MatCardModule,
     MatIconModule,
     MatChipsModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './genie-authority-results.html',
   styleUrl: './genie-authority-results.scss',
 })
-export class GenieAuthorityResults implements OnInit {
+export class GenieAuthorityResults implements OnInit, OnChanges {
   @Input() searchQuery: string = '';
-  @Input() initialResults: AuthorityDto[] = [];
   @Output() backToHome = new EventEmitter<void>();
   
   private http = inject(HttpClient);
@@ -45,6 +46,7 @@ export class GenieAuthorityResults implements OnInit {
   searchResults: AuthorityDto[] = [];
   selectedAuthority: AuthorityDto | null = null;
   showPageDropdown = false;
+  isLoading = false;
   
   totalResults = 0;
   currentPage = 1;
@@ -52,23 +54,37 @@ export class GenieAuthorityResults implements OnInit {
 
   ngOnInit() {
     this.searchControl.setValue(this.searchQuery);
-    
-    if (this.initialResults && this.initialResults.length > 0) {
-      this.searchResults = this.initialResults;
-      this.totalResults = this.initialResults.length;
-    } else {
-      this.performSearch(this.searchQuery);
+    this.performSearch(this.searchQuery);
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['searchQuery'] && !changes['searchQuery'].firstChange) {
+      const newQuery = changes['searchQuery'].currentValue;
+      if (newQuery && newQuery !== this.searchQuery) {
+        this.searchControl.setValue(newQuery);
+        this.currentPage = 1;
+        this.performSearch(newQuery);
+      }
     }
   }
 
   performSearch(query: string): void {
     const searchQuery = query.trim();
     
+    if (!searchQuery || searchQuery.length < 1) {
+      this.searchResults = [];
+      this.totalResults = 0;
+      return;
+    }
+
+    this.isLoading = true;
+    
     this.http.get<any[]>(`${this.API_BASE_URL}/authority/search?q=${encodeURIComponent(searchQuery)}`)
       .pipe(
         catchError(error => {
           console.error('Error searching authorities:', error);
           this.snackBar.open('Error searching authorities', 'Close', { duration: 3000 });
+          this.isLoading = false;
           return of([]);
         })
       )
@@ -87,6 +103,7 @@ export class GenieAuthorityResults implements OnInit {
         }));
         
         this.totalResults = this.searchResults.length;
+        this.isLoading = false;
       });
   }
 
@@ -135,7 +152,7 @@ export class GenieAuthorityResults implements OnInit {
   }
 
   shouldShowEmptyState(): boolean {
-    return this.totalResults === 0;
+    return !this.isLoading && this.totalResults === 0;
   }
 
   shouldShowPagination(): boolean {

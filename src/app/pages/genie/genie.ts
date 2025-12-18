@@ -9,8 +9,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { debounceTime, distinctUntilChanged, map, startWith, catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, startWith, catchError, switchMap } from 'rxjs/operators';
+import { of, Subject } from 'rxjs';
 import { Footer } from "../../shared/footer/footer";
 import { Header } from "../../shared/header/header";
 import { GenieSpeciesResults } from './genie-species-results/genie-species-results';
@@ -42,6 +42,7 @@ import { SearchResultDto } from './genie.types';
 export class Genie implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private snackBar = inject(MatSnackBar);
+  private destroy$ = new Subject<void>();
   
   private readonly API_BASE_URL = 'http://localhost:8000/api/v1';
   
@@ -60,19 +61,19 @@ export class Genie implements OnInit, OnDestroy {
   ngOnInit() {
     this.setupSearchListener();
     this.loadLatestSpecies();
-    
-    // Check URL params on init
     this.checkUrlParams();
     
-    // Handle browser back/forward button
-    window.addEventListener('popstate', () => {
-      this.checkUrlParams();
-    });
+    window.addEventListener('popstate', this.handlePopState);
   }
 
   ngOnDestroy() {
-    // Clean up event listener
-    window.removeEventListener('popstate', () => {});
+    window.removeEventListener('popstate', this.handlePopState);
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private handlePopState = () => {
+    this.checkUrlParams();
   }
 
   private checkUrlParams() {
@@ -81,27 +82,31 @@ export class Genie implements OnInit, OnDestroy {
     const type = urlParams.get('type');
     
     if (query) {
-      this.searchControl.setValue(query);
+      this.searchControl.setValue(query, { emitEvent: false });
       this.searchQuery = query;
       this.showResults = true;
+      this.showAutocomplete = false;
       
       if (type === 'authorities') {
-        this.searchTypeControl.setValue('authorities');
+        this.searchTypeControl.setValue('authorities', { emitEvent: false });
         this.currentSearchType = 'authorities';
       } else {
-        this.searchTypeControl.setValue('species');
+        this.searchTypeControl.setValue('species', { emitEvent: false });
         this.currentSearchType = 'species';
       }
       
-      // Trigger search
-      this.performSearch(query);
+      // Don't perform search here - let the results component handle it
     } else {
-      // No query param - show home view
-      this.showResults = false;
-      this.searchControl.setValue('');
-      this.searchQuery = '';
-      this.searchResults = [];
+      this.resetToHome();
     }
+  }
+
+  private resetToHome() {
+    this.showResults = false;
+    this.searchControl.setValue('', { emitEvent: false });
+    this.searchQuery = '';
+    this.searchResults = [];
+    this.showAutocomplete = false;
   }
 
   loadLatestSpecies() {
@@ -130,92 +135,97 @@ export class Genie implements OnInit, OnDestroy {
   }
 
   setupSearchListener() {
+    // Autocomplete listener - only for showing suggestions
     this.searchControl.valueChanges
       .pipe(
-        startWith(''),
         debounceTime(300),
         distinctUntilChanged(),
-        map(query => {
-          if (!query || query.trim().length < 2) {
+        switchMap(query => {
+          // Only show autocomplete when not in results view
+          if (!query || query.trim().length < 2 || this.showResults) {
             this.showAutocomplete = false;
-            return [];
+            this.searchResults = [];
+            return of([]);
           }
           
           this.isSearching = true;
           this.showAutocomplete = true;
-          this.performSearch(query);
-          return [];
+          return this.performAutocompleteSearch(query);
         })
       )
       .subscribe();
 
+    // Search type change listener
     this.searchTypeControl.valueChanges.subscribe(() => {
       const currentValue = this.searchControl.value;
-      if (currentValue && currentValue.length >= 2) {
+      if (currentValue && currentValue.length >= 2 && !this.showResults) {
+        // Trigger autocomplete refresh
         this.searchControl.setValue(currentValue);
       }
     });
   }
 
-  performSearch(query: string): void {
+  performAutocompleteSearch(query: string) {
     const searchType = this.searchTypeControl.value;
     const searchQuery = query.trim();
     
     if (searchType === 'species') {
-      this.http.get<any[]>(`${this.API_BASE_URL}/species/search?q=${encodeURIComponent(searchQuery)}`)
+      return this.http.get<any[]>(`${this.API_BASE_URL}/species/search?q=${encodeURIComponent(searchQuery)}`)
         .pipe(
+          map(response => {
+            this.searchResults = (response || []).map((item: any) => ({
+              genieId: item.genieId.toString(),
+              upovCode: item.upovCode,
+              botanicalName: item.botanicalName || item.defaultName,
+              commonName: '',
+              family: '',
+              genus: '',
+              region: '',
+              type: 'species',
+              updated: false,
+              imageUrl: ''
+            }));
+            this.isSearching = false;
+            return this.searchResults;
+          }),
           catchError(error => {
             console.error('Error searching species:', error);
-            this.snackBar.open('Error searching species', 'Close', { duration: 3000 });
             this.isSearching = false;
+            this.searchResults = [];
             return of([]);
           })
-        )
-        .subscribe(response => {
-          this.searchResults = (response || []).map((item: any) => ({
-            genieId: item.genieId.toString(),
-            upovCode: item.upovCode,
-            botanicalName: item.botanicalName || item.defaultName,
-            commonName: '',
-            family: '',
-            genus: '',
-            region: '',
-            type: 'species',
-            updated: false,
-            imageUrl: ''
-          }));
-          this.isSearching = false;
-        });
+        );
     } else {
-      this.http.get<any[]>(`${this.API_BASE_URL}/authority/search?q=${encodeURIComponent(searchQuery)}`)
+      return this.http.get<any[]>(`${this.API_BASE_URL}/authority/search?q=${encodeURIComponent(searchQuery)}`)
         .pipe(
+          map(response => {
+            this.searchResults = (response || []).map((item: any) => ({
+              genieId: item.authorityId.toString(),
+              upovCode: item.isoCode || '-',
+              botanicalName: item.name,
+              commonName: '',
+              family: '',
+              genus: '',
+              region: '',
+              type: 'authority',
+              updated: false,
+              imageUrl: this.getFlagUrl(item.isoCode),
+              authorityId: item.authorityId,
+              name: item.name,
+              isoCode: item.isoCode,
+              administrativeWebsite: item.administrativeWebsite,
+              lawWebsite: item.lawWebsite
+            }));
+            this.isSearching = false;
+            return this.searchResults;
+          }),
           catchError(error => {
             console.error('Error searching authorities:', error);
-            this.snackBar.open('Error searching authorities', 'Close', { duration: 3000 });
             this.isSearching = false;
+            this.searchResults = [];
             return of([]);
           })
-        )
-        .subscribe(response => {
-          this.searchResults = (response || []).map((item: any) => ({
-            genieId: item.authorityId.toString(),
-            upovCode: item.isoCode || '-',
-            botanicalName: item.name,
-            commonName: '',
-            family: '',
-            genus: '',
-            region: '',
-            type: 'authority',
-            updated: false,
-            imageUrl: this.getFlagUrl(item.isoCode),
-            authorityId: item.authorityId,
-            name: item.name,
-            isoCode: item.isoCode,
-            administrativeWebsite: item.administrativeWebsite,
-            lawWebsite: item.lawWebsite
-          }));
-          this.isSearching = false;
-        });
+        );
     }
   }
 
@@ -227,66 +237,51 @@ export class Genie implements OnInit, OnDestroy {
   }
 
   selectSpecies(species: SearchResultDto) {
-    // Show results component with selected species
+    this.showAutocomplete = false;
     this.showResults = true;
     this.searchQuery = species.upovCode;
     this.currentSearchType = species.type === 'species' ? 'species' : 'authorities';
-    this.searchControl.setValue(this.searchQuery);
-    this.showAutocomplete = false;
+    this.searchControl.setValue(this.searchQuery, { emitEvent: false });
+    
+    // Update URL
+    window.history.pushState(
+      {}, 
+      '', 
+      `/genie?q=${encodeURIComponent(this.searchQuery)}&type=${this.currentSearchType}`
+    );
   }
 
   onSearchSubmit() {
     const query = this.searchControl.value?.trim();
-    if (query && query.length >= 2) {
-      this.showAutocomplete = false;
-      this.showResults = true;
-      this.searchQuery = query;
-      this.currentSearchType = this.searchTypeControl.value === 'species' ? 'species' : 'authorities';
-      
-      // Update URL without navigation
-      window.history.pushState(
-        {}, 
-        '', 
-        `/genie?q=${encodeURIComponent(query)}&type=${this.currentSearchType}`
-      );
+    if (!query || query.length < 2) {
+      return;
     }
+
+    this.showAutocomplete = false;
+    this.showResults = true;
+    this.searchQuery = query;
+    this.currentSearchType = this.searchTypeControl.value === 'species' ? 'species' : 'authorities';
+    
+    // Update URL
+    window.history.pushState(
+      {}, 
+      '', 
+      `/genie?q=${encodeURIComponent(query)}&type=${this.currentSearchType}`
+    );
   }
 
   onBackToHome() {
-    this.showResults = false;
-    this.searchControl.setValue('');
-    this.searchQuery = '';
-    this.searchResults = [];
-    this.showAutocomplete = false;
-    
-    // Update URL
+    this.resetToHome();
     window.history.pushState({}, '', '/genie');
   }
 
-  // Handle search change from parent
-  onSearchChange() {
-    const query = this.searchControl.value?.trim();
-    if (query && query.length >= 2) {
-      this.showAutocomplete = false;
-      this.performSearch(query);
-      
-      // If already in results view, update the search
-      if (this.showResults) {
-        this.searchQuery = query;
-        this.currentSearchType = this.searchTypeControl.value === 'species' ? 'species' : 'authorities';
-        
-        // Update URL
-        window.history.pushState(
-          {}, 
-          '', 
-          `/genie?q=${encodeURIComponent(query)}&type=${this.currentSearchType}`
-        );
-      }
-    } else if (!query || query.length === 0) {
-      // If search is cleared, go back to home
-      if (this.showResults) {
-        this.onBackToHome();
-      }
+  clearSearchInput() {
+    this.searchControl.setValue('', { emitEvent: false });
+    this.searchResults = [];
+    this.showAutocomplete = false;
+    
+    if (this.showResults) {
+      this.onBackToHome();
     }
   }
 

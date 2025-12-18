@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, inject } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -11,6 +11,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { debounceTime, distinctUntilChanged, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { SearchResultDto, SpeciesDto, FilterOptions, ActiveFilters } from '../genie.types';
@@ -30,14 +31,14 @@ import { SearchResultDto, SpeciesDto, FilterOptions, ActiveFilters } from '../ge
     MatChipsModule,
     MatSnackBarModule,
     MatButtonToggleModule,
-    MatSelectModule
+    MatSelectModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './genie-species-results.html',
   styleUrl: './genie-species-results.scss',
 })
-export class GenieSpeciesResults implements OnInit {
+export class GenieSpeciesResults implements OnInit, OnChanges {
   @Input() searchQuery: string = '';
-  @Input() initialResults: SpeciesDto[] = [];
   @Output() backToHome = new EventEmitter<void>();
   
   private http = inject(HttpClient);
@@ -50,6 +51,7 @@ export class GenieSpeciesResults implements OnInit {
   selectedSpecies: SpeciesDto | null = null;
   showFilters = false;
   showPageDropdown = false;
+  isLoading = false;
   
   totalResults = 0;
   currentPage = 1;
@@ -75,15 +77,20 @@ export class GenieSpeciesResults implements OnInit {
 
   ngOnInit() {
     this.searchControl.setValue(this.searchQuery);
-    
-    if (this.initialResults && this.initialResults.length > 0) {
-      this.searchResults = this.initialResults;
-      this.totalResults = this.initialResults.length;
-    } else {
-      this.performSearch(this.searchQuery);
-    }
-
+    this.performSearch(this.searchQuery);
     this.setupFilterSearch();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['searchQuery'] && !changes['searchQuery'].firstChange) {
+      const newQuery = changes['searchQuery'].currentValue;
+      if (newQuery && newQuery !== this.searchQuery) {
+        this.searchControl.setValue(newQuery);
+        this.resetFilters();
+        this.currentPage = 1;
+        this.performSearch(newQuery);
+      }
+    }
   }
 
   setupFilterSearch() {
@@ -106,11 +113,20 @@ export class GenieSpeciesResults implements OnInit {
   performSearch(query: string): void {
     const searchQuery = query.trim();
     
+    if (!searchQuery || searchQuery.length < 1) {
+      this.searchResults = [];
+      this.totalResults = 0;
+      return;
+    }
+
+    this.isLoading = true;
+    
     this.http.get<any[]>(`${this.API_BASE_URL}/species/search?q=${encodeURIComponent(searchQuery)}`)
       .pipe(
         catchError(error => {
           console.error('Error searching species:', error);
           this.snackBar.open('Error searching species', 'Close', { duration: 3000 });
+          this.isLoading = false;
           return of([]);
         })
       )
@@ -132,7 +148,9 @@ export class GenieSpeciesResults implements OnInit {
         
         this.searchResults = results;
         this.totalResults = results.length;
+        this.isLoading = false;
         
+        // Reset filter options
         this.filterOptions.families = [];
         this.filterOptions.genera = [];
         this.filteredFamilies = [];
@@ -166,9 +184,9 @@ export class GenieSpeciesResults implements OnInit {
 
   applyFiltersToResults() {
     const query = this.searchControl.value;
-    if (query && query.trim().length >= 2) {
-      this.performSearch(query);
+    if (query && query.trim().length >= 1) {
       this.currentPage = 1;
+      this.performSearch(query);
     }
   }
 
@@ -179,6 +197,10 @@ export class GenieSpeciesResults implements OnInit {
       regions: [],
       cropTypes: []
     };
+  }
+
+  clearAllFilters() {
+    this.resetFilters();
     this.applyFiltersToResults();
   }
 
@@ -240,25 +262,15 @@ export class GenieSpeciesResults implements OnInit {
   }
 
   shouldShowResultsHeader(): boolean {
-    const hasFiltersApplied = this.getActiveFilterCount() > 0;
-    
-    if (this.totalResults > 0) return true;
-    if (hasFiltersApplied) return false;
-    
-    return false;
+    return this.totalResults > 0 || this.getActiveFilterCount() > 0;
   }
 
   shouldShowFiltersButton(): boolean {
-    const hasFiltersApplied = this.getActiveFilterCount() > 0;
-    
-    if (this.totalResults > 0) return true;
-    if (hasFiltersApplied) return true;
-    
-    return false;
+    return this.totalResults > 0 || this.getActiveFilterCount() > 0;
   }
 
   shouldShowEmptyState(): boolean {
-    return this.totalResults === 0;
+    return !this.isLoading && this.totalResults === 0;
   }
 
   shouldShowPagination(): boolean {
