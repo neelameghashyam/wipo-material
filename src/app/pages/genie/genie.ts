@@ -109,6 +109,27 @@ export class Genie implements OnInit, OnDestroy {
     this.showAutocomplete = false;
   }
 
+  isRecentlyUpdated(updatedDate: string | undefined): boolean {
+    if (!updatedDate) {
+      return false;
+    }
+
+    try {
+      const updated = new Date(updatedDate);
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const updatedYear = updated.getFullYear();
+
+      // Check if updated this year OR within last 90 days
+      const daysDiff = Math.floor((now.getTime() - updated.getTime()) / (1000 * 60 * 60 * 24));
+      
+      return updatedYear === currentYear || daysDiff <= 90;
+    } catch (error) {
+      console.error('Error parsing date:', error);
+      return false;
+    }
+  }
+
   loadLatestSpecies() {
     this.http.get<any>(`${this.API_BASE_URL}/species?page=0&pageSize=6`)
       .pipe(
@@ -124,12 +145,14 @@ export class Genie implements OnInit, OnDestroy {
           upovCode: item.upovCode,
           botanicalName: item.botanicalName || item.defaultName,
           commonName: '',
-          family: '',
+          family: item.family || '',
           genus: '',
           region: '',
           type: 'species',
-          updated: true,
-          imageUrl: ''
+          updated: this.isRecentlyUpdated(item.updatedDate),
+          imageUrl: '',
+          updatedDate: item.updatedDate,
+          createdDate: item.createdDate
         }));
       });
   }

@@ -28,6 +28,22 @@
     <!-- ===== Filters Row (DROPDOWNS) ===== -->
     <div class="filters-row" *ngIf="showFilters && shouldShowFiltersButton()">
 
+      <!-- Authority -->
+      <mat-select
+        class="filter-select"
+        placeholder="Authority"
+        multiple
+        (selectionChange)="applyFiltersToResults()"
+        [(value)]="activeFilters.authorities"
+      >
+        <mat-option
+          *ngFor="let authority of filterOptions.authorities"
+          [value]="authority.value"
+        >
+          {{ authority.label }} ({{ authority.count }})
+        </mat-option>
+      </mat-select>
+
       <!-- Family -->
       <mat-select
         class="filter-select"
@@ -38,25 +54,9 @@
       >
         <mat-option
           *ngFor="let family of filterOptions.families"
-          [value]="family"
+          [value]="family.value"
         >
-          {{ family }}
-        </mat-option>
-      </mat-select>
-
-      <!-- Genus -->
-      <mat-select
-        class="filter-select"
-        placeholder="Genus"
-        multiple
-        (selectionChange)="applyFiltersToResults()"
-        [(value)]="activeFilters.genera"
-      >
-        <mat-option
-          *ngFor="let genus of filterOptions.genera"
-          [value]="genus"
-        >
-          {{ genus }}
+          {{ family.label }} ({{ family.count }})
         </mat-option>
       </mat-select>
 
@@ -68,9 +68,12 @@
         (selectionChange)="applyFiltersToResults()"
         [(value)]="activeFilters.cropTypes"
       >
-        <mat-option value="oilseed">Oilseed</mat-option>
-        <mat-option value="vegetable">Vegetable</mat-option>
-        <mat-option value="forage">Forage</mat-option>
+        <mat-option
+          *ngFor="let cropType of filterOptions.cropTypes"
+          [value]="cropType.value"
+        >
+          {{ cropType.label }} ({{ cropType.count }})
+        </mat-option>
       </mat-select>
 
     </div>
@@ -78,27 +81,27 @@
     <!-- ===== Selected Filters Chips (BELOW DROPDOWNS) ===== -->
     <div class="selected-filters" *ngIf="showFilters && getActiveFilterCount() > 0 && shouldShowFiltersButton()">
       
+      <!-- Authority chips -->
+      <div
+        class="filter-chip"
+        *ngFor="let authority of activeFilters.authorities"
+      >
+        <span>{{ getFilterLabel('authorities', authority) }}</span>
+        <mat-icon
+          class="filter-chip-close"
+          (click)="removeFilter('authorities', authority)"
+        >close</mat-icon>
+      </div>
+
       <!-- Family chips -->
       <div
         class="filter-chip"
         *ngFor="let family of activeFilters.families"
       >
-        <span>{{ family }}</span>
+        <span>{{ getFilterLabel('families', family) }}</span>
         <mat-icon
           class="filter-chip-close"
           (click)="removeFilter('families', family)"
-        >close</mat-icon>
-      </div>
-
-      <!-- Genus chips -->
-      <div
-        class="filter-chip"
-        *ngFor="let genus of activeFilters.genera"
-      >
-        <span>{{ genus }}</span>
-        <mat-icon
-          class="filter-chip-close"
-          (click)="removeFilter('genera', genus)"
         >close</mat-icon>
       </div>
 
@@ -107,7 +110,7 @@
         class="filter-chip"
         *ngFor="let cropType of activeFilters.cropTypes"
       >
-        <span>{{ cropType }}</span>
+        <span>{{ getFilterLabel('cropTypes', cropType) }}</span>
         <mat-icon
           class="filter-chip-close"
           (click)="removeFilter('cropTypes', cropType)"
@@ -117,7 +120,7 @@
       <!-- Clear all button -->
       <button
         class="clear-all-btn"
-        (click)="resetFilters()"
+        (click)="clearAllFilters()"
       >
         <mat-icon class="clear-all-icon">close</mat-icon>
         <span>Clear all</span>
@@ -143,7 +146,7 @@
           </p>
 
           <p class="empty-subtitle">
-            Try searching with different keywords.
+            Try searching with different keywords or adjusting your filters.
           </p>
 
         </div>
@@ -319,6 +322,11 @@
         <div class="detail-row" *ngIf="selectedSpecies.botanicalName">
           <span class="label">Name</span>
           <mat-chip>{{ selectedSpecies.botanicalName }}</mat-chip>
+        </div>
+
+        <div class="detail-row" *ngIf="selectedSpecies.updatedDate">
+          <span class="label">Last Updated</span>
+          <mat-chip>{{ selectedSpecies.updatedDate | date:'mediumDate' }}</mat-chip>
         </div>
 
       </div>

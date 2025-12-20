@@ -14,7 +14,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { debounceTime, distinctUntilChanged, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { SearchResultDto, SpeciesDto, FilterOptions, ActiveFilters } from '../genie.types';
+import { SearchResultDto, SpeciesDto, FilterOptions, ActiveFilters, FiltersResponse } from '../genie.types';
 
 @Component({
   selector: 'app-genie-species-results',
@@ -48,6 +48,7 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
   
   searchControl = new FormControl('');
   searchResults: SpeciesDto[] = [];
+  allSearchResults: SpeciesDto[] = []; // Store unfiltered results
   selectedSpecies: SpeciesDto | null = null;
   showFilters = false;
   showPageDropdown = false;
@@ -58,27 +59,23 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
   itemsPerPage = 15;
 
   filterOptions: FilterOptions = {
+    authorities: [],
     families: [],
-    genera: [],
-    regions: []
+    cropTypes: []
   };
 
   activeFilters: ActiveFilters = {
+    authorities: [],
     families: [],
-    genera: [],
-    regions: [],
     cropTypes: []
   };
 
   filterSearchControl = new FormControl('');
-  filteredFamilies: string[] = [];
-  filteredGenera: string[] = [];
-  filteredRegions: string[] = [];
 
   ngOnInit() {
     this.searchControl.setValue(this.searchQuery);
+    this.loadFilters();
     this.performSearch(this.searchQuery);
-    this.setupFilterSearch();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -93,20 +90,16 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
     }
   }
 
-  setupFilterSearch() {
-    this.filterSearchControl.valueChanges
-      .pipe(debounceTime(200), distinctUntilChanged())
-      .subscribe(query => {
-        const searchTerm = query?.toLowerCase() || '';
-        this.filteredFamilies = this.filterOptions.families.filter(f => 
-          f.toLowerCase().includes(searchTerm)
-        );
-        this.filteredGenera = this.filterOptions.genera.filter(g => 
-          g.toLowerCase().includes(searchTerm)
-        );
-        this.filteredRegions = this.filterOptions.regions.filter(r => 
-          r.toLowerCase().includes(searchTerm)
-        );
+  loadFilters() {
+    this.http.get<FiltersResponse>(`${this.API_BASE_URL}/filters`)
+      .pipe(
+        catchError(error => {
+          console.error('Error loading filters:', error);
+          return of({ authorities: [], families: [], cropTypes: [] });
+        })
+      )
+      .subscribe(response => {
+        this.filterOptions = response;
       });
   }
 
@@ -115,6 +108,7 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
     
     if (!searchQuery || searchQuery.length < 1) {
       this.searchResults = [];
+      this.allSearchResults = [];
       this.totalResults = 0;
       return;
     }
@@ -136,78 +130,91 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
           upovCode: item.upovCode,
           botanicalName: item.botanicalName || item.defaultName,
           commonName: '',
-          family: '',
+          family: item.family || '',
           genus: '',
           region: '',
           type: 'species',
-          updated: false,
-          imageUrl: ''
+          updated: this.isRecentlyUpdated(item.updatedDate),
+          imageUrl: '',
+          updatedDate: item.updatedDate,
+          createdDate: item.createdDate,
+          fullDetails: item
         }));
         
-        results = this.applyFilters(results);
-        
-        this.searchResults = results;
-        this.totalResults = results.length;
+        this.allSearchResults = results;
+        this.applyFiltersToResults();
         this.isLoading = false;
-        
-        // Reset filter options
-        this.filterOptions.families = [];
-        this.filterOptions.genera = [];
-        this.filteredFamilies = [];
-        this.filteredGenera = [];
       });
   }
 
-  applyFilters(data: SpeciesDto[]): SpeciesDto[] {
-    let filtered = data;
+  isRecentlyUpdated(updatedDate: string | undefined): boolean {
+    if (!updatedDate) {
+      return false;
+    }
 
+    try {
+      const updated = new Date(updatedDate);
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const updatedYear = updated.getFullYear();
+
+      // Check if updated this year OR within last 90 days
+      const daysDiff = Math.floor((now.getTime() - updated.getTime()) / (1000 * 60 * 60 * 24));
+      
+      return updatedYear === currentYear || daysDiff <= 90;
+    } catch (error) {
+      console.error('Error parsing date:', error);
+      return false;
+    }
+  }
+
+  applyFiltersToResults() {
+    let filtered = [...this.allSearchResults];
+
+    // Apply authority filter
+    if (this.activeFilters.authorities.length > 0) {
+      filtered = filtered.filter(item => {
+        const authorities = item.fullDetails?.authorityIsoCodes || [];
+        return this.activeFilters.authorities.some(auth => authorities.includes(auth));
+      });
+    }
+
+    // Apply family filter
     if (this.activeFilters.families.length > 0) {
       filtered = filtered.filter(item => 
         this.activeFilters.families.includes(item.family || '')
       );
     }
 
-    if (this.activeFilters.genera.length > 0) {
-      filtered = filtered.filter(item => 
-        this.activeFilters.genera.includes(item.genus || '')
-      );
+    // Apply crop type filter
+    if (this.activeFilters.cropTypes.length > 0) {
+      filtered = filtered.filter(item => {
+        const cropType = item.fullDetails?.cropType || '';
+        return this.activeFilters.cropTypes.includes(cropType);
+      });
     }
 
-    if (this.activeFilters.regions.length > 0) {
-      filtered = filtered.filter(item => 
-        this.activeFilters.regions.includes(item.region || '')
-      );
-    }
-
-    return filtered;
-  }
-
-  applyFiltersToResults() {
-    const query = this.searchControl.value;
-    if (query && query.trim().length >= 1) {
-      this.currentPage = 1;
-      this.performSearch(query);
-    }
+    this.searchResults = filtered;
+    this.totalResults = filtered.length;
+    this.currentPage = 1; // Reset to first page when filters change
   }
 
   resetFilters() {
     this.activeFilters = {
+      authorities: [],
       families: [],
-      genera: [],
-      regions: [],
       cropTypes: []
     };
+    this.applyFiltersToResults();
   }
 
   clearAllFilters() {
     this.resetFilters();
-    this.applyFiltersToResults();
   }
 
   getActiveFilterCount(): number {
-    return this.activeFilters.families.length + 
-           this.activeFilters.genera.length + 
-           this.activeFilters.regions.length +
+    return this.activeFilters.authorities.length + 
+           this.activeFilters.families.length + 
            this.activeFilters.cropTypes.length;
   }
 
@@ -218,6 +225,11 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
       filterArray.splice(index, 1);
       this.applyFiltersToResults();
     }
+  }
+
+  getFilterLabel(filterType: keyof ActiveFilters, value: string): string {
+    const option = this.filterOptions[filterType].find(opt => opt.value === value);
+    return option ? option.label : value;
   }
 
   selectSpecies(species: SpeciesDto) {
@@ -244,8 +256,9 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
             genus: '',
             region: '',
             type: 'species',
-            updated: false,
+            updated: this.isRecentlyUpdated(response.updatedDate),
             imageUrl: '',
+            updatedDate: response.updatedDate,
             fullDetails: response
           };
           this.searchControl.setValue(response.upovCode);

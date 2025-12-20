@@ -1,4 +1,3 @@
-
 export interface SearchResultDto {
   genieId: string;
   upovCode: string;
@@ -16,22 +15,37 @@ export interface SearchResultDto {
   isoCode?: string;
   administrativeWebsite?: string;
   lawWebsite?: string;
+  updatedDate?: string;
+  createdDate?: string;
 }
 
 // Type aliases for semantic clarity
 export type SpeciesDto = SearchResultDto;
 export type AuthorityDto = SearchResultDto;
 
+// Filter option interface matching the new API structure
+export interface FilterOption {
+  value: string;
+  label: string;
+  count: number;
+}
+
 // Filter interfaces
 export interface FilterOptions {
-  families: string[];
-  genera: string[];
-  regions: string[];
+  authorities: FilterOption[];
+  families: FilterOption[];
+  cropTypes: FilterOption[];
 }
 
 export interface ActiveFilters {
+  authorities: string[];
   families: string[];
-  genera: string[];
-  regions: string[];
   cropTypes: string[];
+}
+
+// API Response interface
+export interface FiltersResponse {
+  authorities: FilterOption[];
+  families: FilterOption[];
+  cropTypes: FilterOption[];
 }
