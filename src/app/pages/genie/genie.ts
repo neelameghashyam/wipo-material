@@ -181,9 +181,14 @@ export class Genie implements OnInit, OnDestroy {
     // Search type change listener
     this.searchTypeControl.valueChanges.subscribe(() => {
       const currentValue = this.searchControl.value;
-      if (currentValue && currentValue.length >= 2 && !this.showResults) {
-        // Trigger autocomplete refresh
-        this.searchControl.setValue(currentValue);
+      if (currentValue && currentValue.length >= 2) {
+        if (this.showResults) {
+          // If in results view, trigger new search
+          this.onSearchSubmit();
+        } else {
+          // If in home view, trigger autocomplete refresh
+          this.searchControl.setValue(currentValue);
+        }
       }
     });
   }
@@ -267,11 +272,7 @@ export class Genie implements OnInit, OnDestroy {
     this.searchControl.setValue(this.searchQuery, { emitEvent: false });
     
     // Update URL
-    window.history.pushState(
-      {}, 
-      '', 
-      `/genie?q=${encodeURIComponent(this.searchQuery)}&type=${this.currentSearchType}`
-    );
+    this.updateUrl(this.searchQuery, this.currentSearchType);
   }
 
   onSearchSubmit() {
@@ -286,16 +287,20 @@ export class Genie implements OnInit, OnDestroy {
     this.currentSearchType = this.searchTypeControl.value === 'species' ? 'species' : 'authorities';
     
     // Update URL
-    window.history.pushState(
-      {}, 
-      '', 
-      `/genie?q=${encodeURIComponent(query)}&type=${this.currentSearchType}`
-    );
+    this.updateUrl(query, this.currentSearchType);
   }
 
   onBackToHome() {
     this.resetToHome();
     window.history.pushState({}, '', '/genie');
+  }
+
+  private updateUrl(query: string, type: 'species' | 'authorities') {
+    window.history.pushState(
+      {}, 
+      '', 
+      `/genie?q=${encodeURIComponent(query)}&type=${type}`
+    );
   }
 
   clearSearchInput() {

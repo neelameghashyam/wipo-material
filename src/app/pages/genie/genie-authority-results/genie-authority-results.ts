@@ -13,6 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { SearchResultDto, AuthorityDto } from '../genie.types';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-genie-authority-results',
