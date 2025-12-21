@@ -178,6 +178,10 @@
             <p class="species-family" *ngIf="item.family">
               {{ item.family }}
             </p>
+
+            <p class="species-crop-type" *ngIf="item.fullDetails?.cropType">
+              {{ item.fullDetails.cropType }}
+            </p>
           </div>
 
           <div class="species-image-wrapper">

@@ -152,7 +152,8 @@ export class Genie implements OnInit, OnDestroy {
           updated: this.isRecentlyUpdated(item.updatedDate),
           imageUrl: '',
           updatedDate: item.updatedDate,
-          createdDate: item.createdDate
+          createdDate: item.createdDate,
+          fullDetails: item
         }));
       });
   }

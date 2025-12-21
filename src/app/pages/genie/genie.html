@@ -137,11 +137,17 @@
               </div>
 
               <h3 class="species-name">{{ species.botanicalName }}</h3>
+              
               <p class="species-common" *ngIf="species.commonName">
                 {{ species.commonName }}
               </p>
+              
               <p class="species-family" *ngIf="species.family">
                 {{ species.family }}
+              </p>
+
+              <p class="species-crop-type" *ngIf="species.fullDetails?.cropType">
+                {{ species.fullDetails.cropType }}
               </p>
             </div>
 

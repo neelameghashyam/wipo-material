@@ -511,6 +511,19 @@
   text-overflow: ellipsis;
 }
 
+.species-crop-type {
+  font-family: 'Figtree', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 100%;
+  color: #1c4240;
+  margin: 0;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .species-image-wrapper {
   width: 116px;
   height: 122px;
