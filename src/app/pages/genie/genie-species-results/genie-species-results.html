@@ -40,7 +40,7 @@
           *ngFor="let authority of filterOptions.authorities"
           [value]="authority.value"
         >
-          {{ authority.label }} ({{ authority.count }})
+          {{ authority.label }}
         </mat-option>
       </mat-select>
 
@@ -56,7 +56,7 @@
           *ngFor="let family of filterOptions.families"
           [value]="family.value"
         >
-          {{ family.label }} ({{ family.count }})
+          {{ family.label }}
         </mat-option>
       </mat-select>
 
@@ -72,7 +72,7 @@
           *ngFor="let cropType of filterOptions.cropTypes"
           [value]="cropType.value"
         >
-          {{ cropType.label }} ({{ cropType.count }})
+          {{ cropType.label }}
         </mat-option>
       </mat-select>
 

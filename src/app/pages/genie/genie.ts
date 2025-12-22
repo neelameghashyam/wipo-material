@@ -165,8 +165,11 @@ export class Genie implements OnInit, OnDestroy {
         debounceTime(300),
         distinctUntilChanged(),
         switchMap(query => {
-          // Only show autocomplete when not in results view
-          if (!query || query.trim().length < 2 || this.showResults) {
+          const searchType = this.searchTypeControl.value;
+          const minLength = searchType === 'species' ? 3 : 2; // 3 for species, 2 for authorities
+          
+          // Only show autocomplete when not in results view and query meets minimum length
+          if (!query || query.trim().length < minLength || this.showResults) {
             this.showAutocomplete = false;
             this.searchResults = [];
             return of([]);
@@ -182,7 +185,10 @@ export class Genie implements OnInit, OnDestroy {
     // Search type change listener
     this.searchTypeControl.valueChanges.subscribe(() => {
       const currentValue = this.searchControl.value;
-      if (currentValue && currentValue.length >= 2) {
+      const searchType = this.searchTypeControl.value;
+      const minLength = searchType === 'species' ? 3 : 2;
+      
+      if (currentValue && currentValue.length >= minLength) {
         if (this.showResults) {
           // If in results view, trigger new search
           this.onSearchSubmit();
@@ -278,7 +284,10 @@ export class Genie implements OnInit, OnDestroy {
 
   onSearchSubmit() {
     const query = this.searchControl.value?.trim();
-    if (!query || query.length < 2) {
+    const searchType = this.searchTypeControl.value;
+    const minLength = searchType === 'species' ? 3 : 2;
+    
+    if (!query || query.length < minLength) {
       return;
     }
 

@@ -73,7 +73,10 @@
             <!-- Autocomplete -->
             <div
               class="autocomplete-dropdown"
-              *ngIf="showAutocomplete && searchControl.value && searchControl.value.length >= 2 && !showResults">
+              *ngIf="showAutocomplete && searchControl.value && 
+                     ((searchTypeControl.value === 'species' && searchControl.value.length >= 3) || 
+                      (searchTypeControl.value === 'authorities' && searchControl.value.length >= 2)) && 
+                     !showResults">
               
               <div
                 class="autocomplete-results"

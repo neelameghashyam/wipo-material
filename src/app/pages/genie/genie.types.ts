@@ -23,11 +23,10 @@ export interface SearchResultDto {
 export type SpeciesDto = SearchResultDto;
 export type AuthorityDto = SearchResultDto;
 
-// Filter option interface matching the new API structure
+// Filter option interface - simplified without count
 export interface FilterOption {
   value: string;
   label: string;
-  count: number;
 }
 
 // Filter interfaces

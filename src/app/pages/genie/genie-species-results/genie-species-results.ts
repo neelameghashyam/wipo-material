@@ -74,7 +74,6 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
 
   ngOnInit() {
     this.searchControl.setValue(this.searchQuery);
-    this.loadFilters();
     this.performSearch(this.searchQuery);
   }
 
@@ -90,26 +89,56 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
     }
   }
 
-  loadFilters() {
-    this.http.get<FiltersResponse>(`${this.API_BASE_URL}/filters`)
-      .pipe(
-        catchError(error => {
-          console.error('Error loading filters:', error);
-          return of({ authorities: [], families: [], cropTypes: [] });
-        })
-      )
-      .subscribe(response => {
-        this.filterOptions = response;
+  generateFiltersFromResults(results: SpeciesDto[]) {
+    // Extract unique authorities
+    const authoritiesMap = new Map<string, { value: string; label: string }>();
+    results.forEach(item => {
+      const isoCodes = item.fullDetails?.authorityIsoCodes || [];
+      const names = item.fullDetails?.authorityNames || [];
+      
+      isoCodes.forEach((code: string, index: number) => {
+        if (code && !authoritiesMap.has(code)) {
+          authoritiesMap.set(code, {
+            value: code,
+            label: names[index] || code
+          });
+        }
       });
+    });
+
+    // Extract unique families
+    const familiesSet = new Set<string>();
+    results.forEach(item => {
+      if (item.family) {
+        familiesSet.add(item.family);
+      }
+    });
+
+    // Extract unique crop types
+    const cropTypesSet = new Set<string>();
+    results.forEach(item => {
+      const cropType = item.fullDetails?.cropType;
+      if (cropType) {
+        cropTypesSet.add(cropType);
+      }
+    });
+
+    // Convert to filter options format (without count)
+    this.filterOptions = {
+      authorities: Array.from(authoritiesMap.values()).sort((a, b) => a.label.localeCompare(b.label)),
+      families: Array.from(familiesSet).map(f => ({ value: f, label: f })).sort((a, b) => a.label.localeCompare(b.label)),
+      cropTypes: Array.from(cropTypesSet).map(c => ({ value: c, label: c })).sort((a, b) => a.label.localeCompare(b.label))
+    };
   }
 
   performSearch(query: string): void {
     const searchQuery = query.trim();
     
-    if (!searchQuery || searchQuery.length < 1) {
+    if (!searchQuery || searchQuery.length < 3) {
       this.searchResults = [];
       this.allSearchResults = [];
       this.totalResults = 0;
+      this.filterOptions = { authorities: [], families: [], cropTypes: [] };
       return;
     }
 
@@ -142,6 +171,7 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
         }));
         
         this.allSearchResults = results;
+        this.generateFiltersFromResults(results); // Generate filters from results
         this.applyFiltersToResults();
         this.isLoading = false;
       });
