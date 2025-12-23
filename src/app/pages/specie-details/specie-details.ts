@@ -237,10 +237,8 @@ export class SpecieDetails implements OnInit {
       ? this.speciesDetails.protection || []
       : this.speciesDetails.dusGuidance?.practicalExperience || [];
 
-    // Filter based on active tab
-    const filteredAuthorities = this.activeTab === 'dus'
-      ? activeAuthorities.filter((auth: any) => !auth.derived)
-      : activeAuthorities;
+    // Don't filter - show ALL authorities
+    const filteredAuthorities = activeAuthorities;
 
     const uniqueAuthorities = new Set<string>();
     
@@ -250,6 +248,8 @@ export class SpecieDetails implements OnInit {
     });
 
     this.authorities = Array.from(uniqueAuthorities).sort();
+    
+    console.log('Search list built:', this.authorities.length, 'authorities for', this.activeTab, 'tab');
   }
 
   getFlagUrl(isoCode: string): string {
