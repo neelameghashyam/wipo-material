@@ -1,0 +1,426 @@
+<app-header></app-header>
+
+<div class="color">
+  <div class="page-wrapper">
+    <div class="genie-container">
+      
+      <!-- Back Navigation -->
+      <div class="se">
+        <a (click)="navigateBack()" class="back-link" style="cursor: pointer;">
+          <mat-icon>arrow_back_ios_new</mat-icon>
+          <span class="back-text">Back to Genie Database</span>
+        </a>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading species details...</p>
+      </div>
+
+      <!-- Content (only show when not loading) -->
+      <ng-container *ngIf="!isLoading && speciesDetails">
+
+        <!-- COMPACT VIEW CARD -->
+        <mat-card *ngIf="!showDetailedView" class="box">
+          <div class="box-content">
+            <div class="left">
+              <div class="top-row">
+                <div class="field">
+                  <p class="label">UPOV Code</p>
+                  <h2 class="heading with-underline">{{ specie.upovCode }}</h2>
+                </div>
+
+                <div class="field">
+                  <p class="label">UPOV Principal Botanical Name</p>
+                  <h2 class="heading">{{ specie.botanicalName }}</h2>
+                </div>
+              </div>
+
+              <div class="bottom-row">
+                <div class="field">
+                  <p class="label">Crop type</p>
+                  <p class="value">
+                    <mat-icon class="leaf-icon">eco</mat-icon>
+                    {{ specie.cropType || '-' }}
+                  </p>
+                </div>
+
+                <div class="field">
+                  <p class="label">Family</p>
+                  <p class="value">{{ specie.family || '-' }}</p>
+                </div>
+              </div>
+
+              <button class="more" (click)="toggleMoreDetails()">
+                More details
+                <mat-icon>expand_more</mat-icon>
+              </button>
+            </div>
+
+            <div class="right">
+              <img src="/specimode1l.png" alt="Flower Image" />
+            </div>
+          </div>
+        </mat-card>
+
+        <!-- DETAILED VIEW CARD -->
+        <mat-card class="card" *ngIf="showDetailedView">
+          <div class="content1">
+            <div class="info">
+              <div class="row">
+                <div>
+                  <span class="mat-label">UPOV Code</span>
+                  <h3 class="with-underline">{{ specie.upovCode }}</h3>
+                </div>
+
+                <div>
+                  <span class="mat-label">UPOV Principal Botanical Name</span>
+                  <h3>{{ specie.botanicalName }}</h3>
+                </div>
+              </div>
+
+              <div class="row">
+                <div>
+                  <span class="mat-label">Crop type</span>
+                  <h3>
+                    <mat-icon class="crop-icon">eco</mat-icon>
+                    {{ specie.cropType || '-' }}
+                  </h3>
+                </div>
+
+                <div>
+                  <span class="mat-label">Family</span>
+                  <p>{{ specie.family || '-' }}</p>
+                </div>
+              </div>
+
+              <div class="row">
+                <div>
+                  <span class="mat-label">Other botanical names</span>
+                  <p>{{ specie1.otherBotanicalNames }}</p>
+                </div>
+
+                <div>
+                  <span class="mat-label">Common names</span>
+                  <p>{{ specie1.commonNames.length > 0 ? specie1.commonNames.join('; ') : '-' }}</p>
+                </div>
+              </div>
+
+              <div class="row">
+                <div>
+                  <span class="mat-label">Variety Denomination Class</span>
+                  <p><strong>{{ specie1.varietyDenominationClass }}</strong></p>
+                </div>
+
+                <div>
+                  <span class="mat-label">Technical Working Party(s)</span>
+                  <p><strong>{{ specie1.technicalWorkingParties }}</strong></p>
+                </div>
+              </div>
+
+              <div class="row" *ngIf="specie1.relatedLinks && specie1.relatedLinks.length > 0">
+                <div>
+                  <span class="mat-label">Related links</span>
+                  <div *ngFor="let link of specie1.relatedLinks" class="link">
+                    <mat-icon>link</mat-icon>
+                    <p>{{ link.label }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <button class="less-btn" mat-button (click)="toggleMoreDetails()">
+                <mat-icon>keyboard_arrow_up</mat-icon>
+                Less details
+              </button>
+            </div>
+
+            <div class="images">
+              <img src="/specimode1l.png" class="main-img" alt="Main flower" />
+              <div class="thumbs">
+                <img src="/specimodel2.png" alt="Thumbnail 1" />
+                <img src="/specimodel2.png" alt="Thumbnail 2" />
+              </div>
+            </div>
+          </div>
+        </mat-card>
+
+        <!-- TABS -->
+        <div class="tabs-container">
+          <div 
+            class="tab" 
+            [class.active]="activeTab === 'protection'"
+            (click)="setTab('protection')"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L3 6V12C3 17.5 7.5 22 12 22C16.5 22 21 17.5 21 12V6L12 2Z" 
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M8 12.5L11 15.5L16 9.5" 
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            Protection
+            <mat-icon class="info-icon">info</mat-icon>
+          </div>
+
+          <div 
+            class="tab" 
+            [class.active]="activeTab === 'dus'"
+            (click)="setTab('dus')"
+          >
+            <mat-icon>menu_book</mat-icon>
+            DUS Guidance and Cooperation
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- TAB CONTENT -->
+        <div class="tab-content">
+          
+          <!-- DUS Content -->
+          <div class="act" *ngIf="activeTab === 'dus'">
+            <div class="dus-header">
+              <div class="dus-info-row">
+                <div class="dus-info-item">
+                  <span class="dus-label">UPOV Test Guidelines</span>
+                  <span class="dus-value">{{ speciesDetails.dusGuidance?.testGuideline || '-' }}</span>
+                </div>
+                <div class="dus-info-item">
+                  <span class="dus-label">Drafting Authority</span>
+                  <span class="dus-value">{{ speciesDetails.dusGuidance?.draftingAuthority || 'None' }}</span>
+                </div>
+              </div>
+            </div>
+            <p class="dus-subtitle">Authorities with Practical Experience ({{ dusCount }})</p>
+          </div>
+
+          <!-- Protection Content -->
+          <div class="act1" *ngIf="activeTab === 'protection'">
+            <p>
+              Members of UPOV which offer protection 
+              <span class="count">({{ protectionCount }})</span>
+            </p>
+          </div>
+
+          <!-- FILTER SECTION -->
+          <div class="select">
+            <label class="label"><p>Select the authority</p></label>
+
+            <div class="tgbut">
+              <!-- Search Input -->
+              <div class="dropdown-container">
+                <div class="input-box">
+                  <mat-icon class="search-icon">search</mat-icon>
+                  <input
+                    type="text"
+                    placeholder="Authority name or ISO code"
+                    [value]="searchTerm"
+                    (input)="onSearch($any($event.target).value)"
+                  />
+                  <span
+                    class="clear-icon"
+                    *ngIf="searchTerm"
+                    (click)="clearSearch()"
+                    role="button"
+                    aria-label="Clear search"
+                  >
+                    <mat-icon>clear</mat-icon>
+                  </span>
+                </div>
+
+                <!-- Dropdown -->
+                <div class="dropdown-box" *ngIf="filteredAuthorities.length > 0">
+                  <div
+                    class="dropdown-item"
+                    *ngFor="let option of filteredAuthorities"
+                    (click)="selectOption(option)"
+                  >
+                    {{ option }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Side Content -->
+              <div class="right-content">
+                <!-- Filter Options - Only show in DUS tab -->
+                <div class="butoptions" *ngIf="activeTab === 'dus'">
+                  <div class="mat2">
+                    <mat-slide-toggle (change)="onHigherRankToggle($event)">
+                      Higher botanical rank
+                    </mat-slide-toggle>
+                  </div>
+
+                  <div>
+                    <p class="download-link">
+                      <mat-icon>download</mat-icon>
+                      Download as .xls
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Non-protection members - Only show in Protection tab -->
+                <div class="non-protection-wrapper" *ngIf="activeTab === 'protection'">
+                  <p class="non-protection-text">
+                    Members of UPOV which do not offer protection for this species
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AUTHORITY CARDS GRID -->
+          <div class="authority-grid" *ngIf="filteredCards.length > 0">
+            <mat-card class="authority-card" *ngFor="let card of getPaginatedCards()">
+              <img
+                *ngIf="card.flag"
+                class="flag"
+                [src]="card.flag"
+                [alt]="card.country + ' flag'"
+                (error)="$any($event.target).style.display='none'"
+              />
+
+              <div class="header">
+                <h3 class="country-name">
+                  {{ card.country }}
+                  <span class="code">({{ card.code }})</span>
+                </h3>
+                <mat-chip color="primary" selected>{{ card.tag }}</mat-chip>
+              </div>
+
+              <div class="contacts">
+                <div class="col">
+                  <p *ngIf="activeTab === 'protection' && card.protectionType">
+                    <mat-icon>shield</mat-icon>
+                    {{ card.protectionType }}
+                  </p>
+                  
+                  <p 
+                    *ngIf="card.administrativeWebsite" 
+                    class="website-link"
+                    (click)="openWebsite(card.administrativeWebsite)"
+                  >
+                    <mat-icon>language</mat-icon>
+                    Administrative Website
+                  </p>
+                  
+                  <p 
+                    *ngIf="card.lawWebsite" 
+                    class="website-link"
+                    (click)="openWebsite(card.lawWebsite)"
+                  >
+                    <mat-icon>gavel</mat-icon>
+                    Law Website
+                  </p>
+                </div>
+
+                <div class="col">
+                  <p>
+                    <mat-icon>business</mat-icon>
+                    {{ card.contacts[0].office }}
+                  </p>
+                  
+                  <p *ngIf="activeTab === 'protection' && card.notes" class="notes">
+                    <mat-icon>info</mat-icon>
+                    {{ card.notes || 'No notes' }}
+                  </p>
+                </div>
+              </div>
+            </mat-card>
+          </div>
+
+          <!-- Empty state -->
+          <div class="empty-state" *ngIf="filteredCards.length === 0 && !isLoading">
+            <p>No authorities found matching your criteria.</p>
+          </div>
+
+          <!-- PAGINATION -->
+          <div class="pagination" *ngIf="shouldShowPagination()">
+            <div class="pagination-inner">
+              
+              <!-- First -->
+              <button
+                class="page-btn nav-btn"
+                [disabled]="currentPage === 1"
+                (click)="changePage(1)"
+              >
+                <mat-icon class="chevron double">keyboard_double_arrow_left</mat-icon>
+              </button>
+
+              <!-- Previous -->
+              <button
+                class="page-btn nav-btn"
+                [disabled]="currentPage === 1"
+                (click)="changePage(currentPage - 1)"
+              >
+                <mat-icon class="chevron">chevron_left</mat-icon>
+              </button>
+
+              <!-- Page numbers -->
+              <ng-container *ngFor="let page of getPageNumbers()">
+                <button
+                  *ngIf="page !== '...'"
+                  class="page-btn page-number"
+                  [class.active]="page === currentPage"
+                  (click)="changePage(page)"
+                >
+                  {{ page }}
+                </button>
+                <span *ngIf="page === '...'" class="page-dots">…</span>
+              </ng-container>
+
+              <!-- Page info -->
+              <div class="page-info-wrapper">
+                <button
+                  class="page-btn page-info-btn"
+                  type="button"
+                  (click)="togglePageDropdown()"
+                >
+                  <span class="page-info-text">
+                    {{ currentPage }} of {{ getTotalPages() }}
+                  </span>
+                  <mat-icon class="page-info-icon">expand_more</mat-icon>
+                </button>
+
+                <!-- Dropdown -->
+                <div class="page-dropdown" *ngIf="showPageDropdown">
+                  <button
+                    class="page-dropdown-item"
+                    *ngFor="let page of getAllPages()"
+                    [class.active]="page === currentPage"
+                    (click)="goToPageFromDropdown(page)"
+                  >
+                    {{ page }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Next -->
+              <button
+                class="page-btn nav-btn"
+                [disabled]="currentPage === getTotalPages()"
+                (click)="changePage(currentPage + 1)"
+              >
+                <mat-icon class="chevron">chevron_right</mat-icon>
+              </button>
+
+              <!-- Last -->
+              <button
+                class="page-btn nav-btn"
+                [disabled]="currentPage === getTotalPages()"
+                (click)="changePage(getTotalPages())"
+              >
+                <mat-icon class="chevron double">keyboard_double_arrow_right</mat-icon>
+              </button>
+
+            </div>
+          </div>
+
+        </div>
+
+      </ng-container>
+
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer>

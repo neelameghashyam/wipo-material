@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -42,6 +43,7 @@ import { SearchResultDto } from './genie.types';
 export class Genie implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private snackBar = inject(MatSnackBar);
+  private router = inject(Router);
   private destroy$ = new Subject<void>();
   
   private readonly API_BASE_URL = 'http://localhost:8000/api/v1';
@@ -94,8 +96,6 @@ export class Genie implements OnInit, OnDestroy {
         this.searchTypeControl.setValue('species', { emitEvent: false });
         this.currentSearchType = 'species';
       }
-      
-      // Don't perform search here - let the results component handle it
     } else {
       this.resetToHome();
     }
@@ -120,7 +120,6 @@ export class Genie implements OnInit, OnDestroy {
       const currentYear = now.getFullYear();
       const updatedYear = updated.getFullYear();
 
-      // Check if updated this year OR within last 90 days
       const daysDiff = Math.floor((now.getTime() - updated.getTime()) / (1000 * 60 * 60 * 24));
       
       return updatedYear === currentYear || daysDiff <= 90;
@@ -159,16 +158,14 @@ export class Genie implements OnInit, OnDestroy {
   }
 
   setupSearchListener() {
-    // Autocomplete listener - only for showing suggestions
     this.searchControl.valueChanges
       .pipe(
         debounceTime(300),
         distinctUntilChanged(),
         switchMap(query => {
           const searchType = this.searchTypeControl.value;
-          const minLength = searchType === 'species' ? 3 : 2; // 3 for species, 2 for authorities
+          const minLength = searchType === 'species' ? 3 : 2;
           
-          // Only show autocomplete when not in results view and query meets minimum length
           if (!query || query.trim().length < minLength || this.showResults) {
             this.showAutocomplete = false;
             this.searchResults = [];
@@ -182,7 +179,6 @@ export class Genie implements OnInit, OnDestroy {
       )
       .subscribe();
 
-    // Search type change listener
     this.searchTypeControl.valueChanges.subscribe(() => {
       const currentValue = this.searchControl.value;
       const searchType = this.searchTypeControl.value;
@@ -190,10 +186,8 @@ export class Genie implements OnInit, OnDestroy {
       
       if (currentValue && currentValue.length >= minLength) {
         if (this.showResults) {
-          // If in results view, trigger new search
           this.onSearchSubmit();
         } else {
-          // If in home view, trigger autocomplete refresh
           this.searchControl.setValue(currentValue);
         }
       }
@@ -273,13 +267,18 @@ export class Genie implements OnInit, OnDestroy {
 
   selectSpecies(species: SearchResultDto) {
     this.showAutocomplete = false;
-    this.showResults = true;
-    this.searchQuery = species.upovCode;
-    this.currentSearchType = species.type === 'species' ? 'species' : 'authorities';
-    this.searchControl.setValue(this.searchQuery, { emitEvent: false });
     
-    // Update URL
-    this.updateUrl(this.searchQuery, this.currentSearchType);
+    // Navigate to species details page
+    if (species.type === 'species') {
+      this.router.navigate(['/species', species.genieId]);
+    } else {
+      // For authorities, go to search results
+      this.showResults = true;
+      this.searchQuery = species.upovCode;
+      this.currentSearchType = 'authorities';
+      this.searchControl.setValue(this.searchQuery, { emitEvent: false });
+      this.updateUrl(this.searchQuery, this.currentSearchType);
+    }
   }
 
   onSearchSubmit() {
@@ -296,7 +295,6 @@ export class Genie implements OnInit, OnDestroy {
     this.searchQuery = query;
     this.currentSearchType = this.searchTypeControl.value === 'species' ? 'species' : 'authorities';
     
-    // Update URL
     this.updateUrl(query, this.currentSearchType);
   }
 

@@ -1,5 +1,6 @@
 import { Component, OnInit, OnChanges, SimpleChanges, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -14,7 +15,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { debounceTime, distinctUntilChanged, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { SearchResultDto, SpeciesDto, FilterOptions, ActiveFilters, FiltersResponse } from '../genie.types';
+import { SearchResultDto, SpeciesDto, FilterOptions, ActiveFilters } from '../genie.types';
 
 @Component({
   selector: 'app-genie-species-results',
@@ -43,12 +44,13 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
   
   private http = inject(HttpClient);
   private snackBar = inject(MatSnackBar);
+  private router = inject(Router);
   
   private readonly API_BASE_URL = 'http://localhost:8000/api/v1';
   
   searchControl = new FormControl('');
   searchResults: SpeciesDto[] = [];
-  allSearchResults: SpeciesDto[] = []; // Store unfiltered results
+  allSearchResults: SpeciesDto[] = [];
   selectedSpecies: SpeciesDto | null = null;
   showFilters = false;
   showPageDropdown = false;
@@ -90,7 +92,6 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
   }
 
   generateFiltersFromResults(results: SpeciesDto[]) {
-    // Extract unique authorities
     const authoritiesMap = new Map<string, { value: string; label: string }>();
     results.forEach(item => {
       const isoCodes = item.fullDetails?.authorityIsoCodes || [];
@@ -106,7 +107,6 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
       });
     });
 
-    // Extract unique families
     const familiesSet = new Set<string>();
     results.forEach(item => {
       if (item.family) {
@@ -114,7 +114,6 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
       }
     });
 
-    // Extract unique crop types
     const cropTypesSet = new Set<string>();
     results.forEach(item => {
       const cropType = item.fullDetails?.cropType;
@@ -123,7 +122,6 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
       }
     });
 
-    // Convert to filter options format (without count)
     this.filterOptions = {
       authorities: Array.from(authoritiesMap.values()).sort((a, b) => a.label.localeCompare(b.label)),
       families: Array.from(familiesSet).map(f => ({ value: f, label: f })).sort((a, b) => a.label.localeCompare(b.label)),
@@ -171,7 +169,7 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
         }));
         
         this.allSearchResults = results;
-        this.generateFiltersFromResults(results); // Generate filters from results
+        this.generateFiltersFromResults(results);
         this.applyFiltersToResults();
         this.isLoading = false;
       });
@@ -188,7 +186,6 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
       const currentYear = now.getFullYear();
       const updatedYear = updated.getFullYear();
 
-      // Check if updated this year OR within last 90 days
       const daysDiff = Math.floor((now.getTime() - updated.getTime()) / (1000 * 60 * 60 * 24));
       
       return updatedYear === currentYear || daysDiff <= 90;
@@ -201,7 +198,6 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
   applyFiltersToResults() {
     let filtered = [...this.allSearchResults];
 
-    // Apply authority filter
     if (this.activeFilters.authorities.length > 0) {
       filtered = filtered.filter(item => {
         const authorities = item.fullDetails?.authorityIsoCodes || [];
@@ -209,14 +205,12 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
       });
     }
 
-    // Apply family filter
     if (this.activeFilters.families.length > 0) {
       filtered = filtered.filter(item => 
         this.activeFilters.families.includes(item.family || '')
       );
     }
 
-    // Apply crop type filter
     if (this.activeFilters.cropTypes.length > 0) {
       filtered = filtered.filter(item => {
         const cropType = item.fullDetails?.cropType || '';
@@ -226,7 +220,7 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
 
     this.searchResults = filtered;
     this.totalResults = filtered.length;
-    this.currentPage = 1; // Reset to first page when filters change
+    this.currentPage = 1;
   }
 
   resetFilters() {
@@ -263,37 +257,8 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
   }
 
   selectSpecies(species: SpeciesDto) {
-    this.loadSpeciesDetails(species.genieId);
-  }
-
-  loadSpeciesDetails(genieId: string) {
-    this.http.get<any>(`${this.API_BASE_URL}/species/${genieId}`)
-      .pipe(
-        catchError(error => {
-          console.error('Error loading species details:', error);
-          this.snackBar.open('Error loading species details', 'Close', { duration: 3000 });
-          return of(null);
-        })
-      )
-      .subscribe(response => {
-        if (response) {
-          this.selectedSpecies = {
-            genieId: response.genieId.toString(),
-            upovCode: response.upovCode,
-            botanicalName: response.botanicalName,
-            commonName: response.names?.commonNames?.en || '',
-            family: response.family || '',
-            genus: '',
-            region: '',
-            type: 'species',
-            updated: this.isRecentlyUpdated(response.updatedDate),
-            imageUrl: '',
-            updatedDate: response.updatedDate,
-            fullDetails: response
-          };
-          this.searchControl.setValue(response.upovCode);
-        }
-      });
+    // Navigate to species details page
+    this.router.navigate(['/species', species.genieId]);
   }
 
   clearSearch() {
