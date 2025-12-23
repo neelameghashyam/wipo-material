@@ -95,31 +95,21 @@ export class SpecieDetails implements OnInit {
   loadSpeciesDetails(genieId: string): void {
     this.isLoading = true;
     
-    console.log('Loading species details for genieId:', genieId);
-    
     this.http.get<SpeciesDetailsDto>(`${this.API_BASE_URL}/species/${genieId}`)
       .pipe(
         catchError(error => {
           console.error('Error loading species details:', error);
-          console.error('Error details:', JSON.stringify(error, null, 2));
           this.snackBar.open('Error loading species details', 'Close', { duration: 3000 });
           this.isLoading = false;
           return of(null);
         })
       )
       .subscribe(response => {
-        console.log('API Response received:', response);
-        console.log('Response type:', typeof response);
-        console.log('Protection array:', response?.protection);
-        console.log('DUS Guidance:', response?.dusGuidance);
-        
         if (response) {
           this.speciesDetails = response;
           this.processSpeciesData(response);
           this.buildAuthorityCards();
           this.buildAuthoritySearchList();
-        } else {
-          console.error('No response data received');
         }
         this.isLoading = false;
       });
@@ -143,15 +133,20 @@ export class SpecieDetails implements OnInit {
       relatedLinks: this.buildRelatedLinks(data)
     };
 
-    // Update counts - FIXED to use practicalExperience for both
-    const practicalExp = data.dusGuidance?.practicalExperience || [];
-    this.protectionCount = practicalExp.length; // All authorities
-    this.dusCount = practicalExp.filter(auth => !auth.derived).length; // Non-derived only
+    // Update counts - Use protection for Protection tab, practicalExperience for DUS tab
+    this.protectionCount = data.protection?.length || 0;
+    this.dusCount = data.dusGuidance?.practicalExperience?.filter(auth => !auth.derived).length || 0;
     
-    console.log('Protection count:', this.protectionCount);
-    console.log('DUS count:', this.dusCount);
-    console.log('Protection data:', data.protection);
-    console.log('DUS data:', data.dusGuidance?.practicalExperience);
+    console.log('=== COUNTS ===');
+    console.log('Protection count:', this.protectionCount, '(from data.protection)');
+    console.log('DUS count:', this.dusCount, '(non-derived from practicalExperience)');
+    
+    if (this.protectionCount === 0) {
+      console.warn('⚠️ Protection array is EMPTY! Backend is not returning protection data.');
+    }
+    if (this.dusCount === 0 && data.dusGuidance?.practicalExperience?.length > 0) {
+      console.warn('⚠️ All DUS authorities are marked as derived!');
+    }
   }
 
   parseCommonNames(commonNames: any): string[] {
@@ -181,33 +176,33 @@ export class SpecieDetails implements OnInit {
   }
 
   buildAuthorityCards(): void {
-    console.log('=== buildAuthorityCards called ===');
-    console.log('speciesDetails exists:', !!this.speciesDetails);
+    console.log('=== buildAuthorityCards ===');
     console.log('activeTab:', this.activeTab);
     
     if (!this.speciesDetails) {
-      console.error('No species details available!');
+      console.error('No species details!');
       return;
     }
 
-    // FIXED: Use practicalExperience for BOTH tabs
-    // Protection tab shows ALL practicalExperience
-    // DUS tab shows only non-derived practicalExperience
-    const practicalExperience = this.speciesDetails.dusGuidance?.practicalExperience || [];
+    // Use CORRECT data source for each tab
+    const activeAuthorities = this.activeTab === 'protection' 
+      ? this.speciesDetails.protection || []          // Protection uses protection array
+      : this.speciesDetails.dusGuidance?.practicalExperience || []; // DUS uses practicalExperience
 
-    console.log('practicalExperience count:', practicalExperience.length);
-    console.log('practicalExperience:', practicalExperience);
+    console.log('Source:', this.activeTab === 'protection' ? 'protection[]' : 'practicalExperience[]');
+    console.log('Count before filter:', activeAuthorities.length);
 
-    // Filter based on tab
+    // Filter out derived for DUS tab ONLY
     const filteredAuthorities = this.activeTab === 'dus'
-      ? practicalExperience.filter((auth: any) => !auth.derived)
-      : practicalExperience; // Protection tab shows ALL
+      ? activeAuthorities.filter((auth: any) => !auth.derived)
+      : activeAuthorities;
 
-    console.log('After tab filter:', filteredAuthorities.length);
-    console.log('filteredAuthorities:', filteredAuthorities);
+    console.log('Count after filter:', filteredAuthorities.length);
 
     if (!filteredAuthorities || filteredAuthorities.length === 0) {
-      console.warn('No authorities to display after filtering!');
+      if (this.activeTab === 'protection') {
+        console.warn('⚠️ Protection array is EMPTY from API!');
+      }
       this.allCards = [];
       this.filteredCards = [];
       return;
@@ -234,20 +229,14 @@ export class SpecieDetails implements OnInit {
       };
     });
 
-    console.log('allCards created:', this.allCards.length);
-    console.log('allCards sample:', this.allCards[0]);
-
     this.filteredCards = [...this.allCards];
     this.currentPage = 1;
-    
-    console.log('filteredCards set:', this.filteredCards.length);
-    console.log('=== buildAuthorityCards complete ===');
   }
 
   buildAuthoritySearchList(): void {
     if (!this.speciesDetails) return;
 
-    // FIXED: Always use practicalExperience for search
+    // Always use practicalExperience for search
     const practicalExp = this.speciesDetails.dusGuidance?.practicalExperience || [];
 
     // Filter based on active tab
