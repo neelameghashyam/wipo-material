@@ -216,6 +216,7 @@ export class SpecieDetails implements OnInit {
         notes: this.activeTab === 'protection' ? (auth.notes || '') : (auth.noteSequence || ''),
         administrativeWebsite: auth.administrativeWebsite,
         lawWebsite: auth.lawWebsite,
+        authorityId: auth.authorityId, // Store authorityId for navigation
         contacts: [{
           name: '-',
           email: '-',
@@ -343,6 +344,13 @@ export class SpecieDetails implements OnInit {
 
   navigateBack(): void {
     this.router.navigate(['/genie']);
+  }
+
+  // NEW: Navigate to authority details
+  navigateToAuthority(card: AuthorityCardData): void {
+    if (card.authorityId) {
+      this.router.navigate(['/authority', card.authorityId]);
+    }
   }
 
   // Pagination methods

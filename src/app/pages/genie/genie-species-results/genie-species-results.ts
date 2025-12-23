@@ -1,5 +1,5 @@
 import { Component, OnInit, OnChanges, SimpleChanges, Input, Output, EventEmitter, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -22,6 +22,8 @@ import { SearchResultDto, SpeciesDto, FilterOptions, ActiveFilters } from '../ge
   standalone: true,
   imports: [
     CommonModule,
+    NgIf,
+    NgFor,
     HttpClientModule,
     ReactiveFormsModule,
     MatFormFieldModule,

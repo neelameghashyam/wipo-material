@@ -2,6 +2,7 @@ import { Component, OnInit, OnChanges, SimpleChanges, Input, Output, EventEmitte
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -39,6 +40,7 @@ export class GenieAuthorityResults implements OnInit, OnChanges {
   @Output() backToHome = new EventEmitter<void>();
   
   private http = inject(HttpClient);
+  private router = inject(Router);
   private snackBar = inject(MatSnackBar);
   
   private readonly API_BASE_URL = 'http://localhost:8000/api/v1';
@@ -116,7 +118,10 @@ export class GenieAuthorityResults implements OnInit, OnChanges {
   }
 
   selectAuthority(authority: AuthorityDto) {
-    this.loadAuthorityDetails(authority.authorityId!);
+    // Navigate to authority details page instead of loading inline
+    if (authority.authorityId) {
+      this.router.navigate(['/authority', authority.authorityId]);
+    }
   }
 
   loadAuthorityDetails(authorityId: number) {

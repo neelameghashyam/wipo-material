@@ -63,6 +63,7 @@ export interface AuthorityCardData {
   contacts: AuthorityContact[];
   administrativeWebsite: string | null;
   lawWebsite: string | null;
+  authorityId?: number;
   protectionType?: string;
   notes?: string;
 }
