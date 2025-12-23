@@ -15,7 +15,7 @@ import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { Footer } from "../../shared/footer/footer";
 import { Header } from "../../shared/header/header";
-import { SpeciesDetailsDto, AuthorityCardData } from'./specie-details.types';
+import { SpeciesDetailsDto, AuthorityCardData } from './specie-details.types';
 
 @Component({
   selector: 'app-specie-details',
@@ -136,6 +136,11 @@ export class SpecieDetails implements OnInit {
     // Update counts
     this.protectionCount = data.protection?.length || 0;
     this.dusCount = data.dusGuidance?.practicalExperience?.filter(auth => !auth.derived).length || 0;
+    
+    console.log('Protection count:', this.protectionCount);
+    console.log('DUS count:', this.dusCount);
+    console.log('Protection data:', data.protection);
+    console.log('DUS data:', data.dusGuidance?.practicalExperience);
   }
 
   parseCommonNames(commonNames: any): string[] {
