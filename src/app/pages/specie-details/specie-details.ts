@@ -214,10 +214,10 @@ export class SpecieDetails implements OnInit {
       return {
         country: auth.authorityName,
         code: isoCode,
-        tag: this.activeTab === 'protection' ? 'Protection' : 'DUS Experience',
+        tag: this.activeTab === 'protection' ? (auth.protectionType || 'Protection') : 'DUS Experience',
         flag: this.getFlagUrl(isoCode),
-        protectionType: this.activeTab === 'protection' ? 'Protection' : undefined,
-        notes: auth.noteSequence || '',
+        protectionType: auth.protectionType,
+        notes: this.activeTab === 'protection' ? (auth.notes || '') : (auth.noteSequence || ''),
         administrativeWebsite: auth.administrativeWebsite,
         lawWebsite: auth.lawWebsite,
         contacts: [{
@@ -236,13 +236,15 @@ export class SpecieDetails implements OnInit {
   buildAuthoritySearchList(): void {
     if (!this.speciesDetails) return;
 
-    // Always use practicalExperience for search
-    const practicalExp = this.speciesDetails.dusGuidance?.practicalExperience || [];
+    // Use CORRECT data source for each tab
+    const activeAuthorities = this.activeTab === 'protection' 
+      ? this.speciesDetails.protection || []
+      : this.speciesDetails.dusGuidance?.practicalExperience || [];
 
     // Filter based on active tab
     const filteredAuthorities = this.activeTab === 'dus'
-      ? practicalExp.filter((auth: any) => !auth.derived)
-      : practicalExp;
+      ? activeAuthorities.filter((auth: any) => !auth.derived)
+      : activeAuthorities;
 
     const uniqueAuthorities = new Set<string>();
     
