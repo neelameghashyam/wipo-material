@@ -270,7 +270,16 @@
 
           <!-- AUTHORITY CARDS GRID -->
           <div class="authority-grid" *ngIf="filteredCards.length > 0">
-            <mat-card class="authority-card" *ngFor="let card of getPaginatedCards()">
+            <!-- 🔥 UPDATED: Added click handler to navigate to authority details -->
+            <mat-card 
+              class="authority-card" 
+              *ngFor="let card of getPaginatedCards()"
+              (click)="navigateToAuthority(card)"
+              style="cursor: pointer;"
+              role="button"
+              tabindex="0"
+              (keydown.enter)="navigateToAuthority(card)"
+            >
               <img
                 *ngIf="card.flag"
                 class="flag"
@@ -294,19 +303,21 @@
                     {{ card.protectionType }}
                   </p>
                   
+                  <!-- 🔥 UPDATED: Added stopPropagation to prevent card click when clicking website -->
                   <p 
                     *ngIf="card.administrativeWebsite" 
                     class="website-link"
-                    (click)="openWebsite(card.administrativeWebsite)"
+                    (click)="openWebsite(card.administrativeWebsite); $event.stopPropagation()"
                   >
                     <mat-icon>language</mat-icon>
                     Administrative Website
                   </p>
                   
+                  <!-- 🔥 UPDATED: Added stopPropagation to prevent card click when clicking website -->
                   <p 
                     *ngIf="card.lawWebsite" 
                     class="website-link"
-                    (click)="openWebsite(card.lawWebsite)"
+                    (click)="openWebsite(card.lawWebsite); $event.stopPropagation()"
                   >
                     <mat-icon>gavel</mat-icon>
                     Law Website
