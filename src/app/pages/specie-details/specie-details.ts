@@ -135,17 +135,15 @@ export class SpecieDetails implements OnInit {
 
     // Update counts - Use protection for Protection tab, practicalExperience for DUS tab
     this.protectionCount = data.protection?.length || 0;
-    this.dusCount = data.dusGuidance?.practicalExperience?.filter(auth => !auth.derived).length || 0;
+    // Show ALL practicalExperience for DUS (don't filter derived)
+    this.dusCount = data.dusGuidance?.practicalExperience?.length || 0;
     
     console.log('=== COUNTS ===');
     console.log('Protection count:', this.protectionCount, '(from data.protection)');
-    console.log('DUS count:', this.dusCount, '(non-derived from practicalExperience)');
+    console.log('DUS count:', this.dusCount, '(ALL from practicalExperience, including derived)');
     
     if (this.protectionCount === 0) {
       console.warn('⚠️ Protection array is EMPTY! Backend is not returning protection data.');
-    }
-    if (this.dusCount === 0 && data.dusGuidance?.practicalExperience?.length > 0) {
-      console.warn('⚠️ All DUS authorities are marked as derived!');
     }
   }
 
@@ -192,10 +190,8 @@ export class SpecieDetails implements OnInit {
     console.log('Source:', this.activeTab === 'protection' ? 'protection[]' : 'practicalExperience[]');
     console.log('Count before filter:', activeAuthorities.length);
 
-    // Filter out derived for DUS tab ONLY
-    const filteredAuthorities = this.activeTab === 'dus'
-      ? activeAuthorities.filter((auth: any) => !auth.derived)
-      : activeAuthorities;
+    // Don't filter - show ALL authorities for both tabs
+    const filteredAuthorities = activeAuthorities;
 
     console.log('Count after filter:', filteredAuthorities.length);
 
