@@ -131,6 +131,11 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
     };
   }
 
+  getPlaceholderImage(): string {
+    const images = ['./emp1.png', './h.png', './a1.png', './k.png', './r.jpg', './emp.png'];
+    return images[Math.floor(Math.random() * images.length)];
+  }
+
   performSearch(query: string): void {
     const searchQuery = query.trim();
     
@@ -164,7 +169,7 @@ export class GenieSpeciesResults implements OnInit, OnChanges {
           region: '',
           type: 'species',
           updated: this.isRecentlyUpdated(item.updatedDate),
-          imageUrl: '',
+          imageUrl: this.getPlaceholderImage(),
           updatedDate: item.updatedDate,
           createdDate: item.createdDate,
           fullDetails: item

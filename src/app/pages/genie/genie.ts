@@ -129,8 +129,13 @@ export class Genie implements OnInit, OnDestroy {
     }
   }
 
+  getPlaceholderImage(): string {
+    const images = ['./emp1.png', './h.png', './a1.png', './k.png', './r.jpg', './emp.png'];
+    return images[Math.floor(Math.random() * images.length)];
+  }
+
   loadLatestSpecies() {
-    this.http.get<any>(`${this.API_BASE_URL}/species?page=0&pageSize=6`)
+    this.http.get<any>(`${this.API_BASE_URL}/species`)
       .pipe(
         catchError(error => {
           console.error('Error loading latest species:', error);
@@ -139,7 +144,7 @@ export class Genie implements OnInit, OnDestroy {
         })
       )
       .subscribe(response => {
-        this.latestSpecies = (response.species || []).map((item: any) => ({
+        this.latestSpecies = (response.species || []).slice(0,6).map((item: any) => ({
           genieId: item.genieId.toString(),
           upovCode: item.upovCode,
           botanicalName: item.botanicalName || item.defaultName,
@@ -149,7 +154,7 @@ export class Genie implements OnInit, OnDestroy {
           region: '',
           type: 'species',
           updated: this.isRecentlyUpdated(item.updatedDate),
-          imageUrl: '',
+          imageUrl: this.getPlaceholderImage(),
           updatedDate: item.updatedDate,
           createdDate: item.createdDate,
           fullDetails: item
